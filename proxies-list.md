@@ -3,6 +3,10 @@
 A list of proxies, frontends and different ways to access inaccesible content.
 There are more but we only manage the ones that can be loaded with the url set.
 
+All of the destiny urls become automatically filters, if a user sends
+https://nitter.com/{user/status/id} we can think that she wants an alternative
+to nitter/twitter and redirect to https://xcancel.com/{user/status/id}
+
 ## General
 
 | tech       | type         | url                      |
@@ -106,3 +110,45 @@ There are more but we only manage the ones that can be loaded with the url set.
 ### Quora
 
 ## Alternative Domain Name Systems
+
+### Ethereum Name Service (ENS)
+
+### Unstoppable Domains
+
+### Handshake (HNS)
+
+### Solana Name Service (SNS / Bonfida)
+
+### TON DNS
+
+### Space ID
+
+### Namecoin
+
+### Emercoin
+
+### Starknet ID
+
+### SuiNS & Aptos Names
+
+### Freename
+
+### Yat (Emoji Domains)
+
+### OpenNIC
+
+### New Nations
+
+### Alfis
+
+### Tor Onion Services
+
+### I2P (Invisible Internet Project)
+
+### GNU Name System (GNS)
+
+### IPNS
+
+### Loki
+
+### 
