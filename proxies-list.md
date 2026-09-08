@@ -84,17 +84,17 @@ to nitter/twitter and redirect to https://xcancel.com/{user/status/id}
 
 ### Imgur
 
-| tech | type | url |pattern| | ----- | ------------------ |
---------------------------------------- |imgur.com/| | rimgo | domain
-replacement | https://anaimg.starbeamrainbowlabs.com/ |imgur.com/| | rimgo |
-domain replacement | https://imgur.artemislena.eu/ |imgur.com/| | rimgo | domain
-replacement | https://imgur.nerdvpn.de/ |imgur.com/| | rimgo | domain
-replacement | https://r.opnxng.com/ |imgur.com/| | rimgo | domain replacement |
-https://rimgo.bloat.cat/ |imgur.com/| | rimgo | domain replacement |
-https://rimgo.canine.tools/ |imgur.com/| | rimgo | domain replacement |
-https://rimgo.catsarch.com/ |imgur.com/| | rimgo | domain replacement |
-https://rimgo.reallyaweso.me/ |imgur.com/| | rimgo | domain replacement |
-https://rimgo.privacyredirect.com |imgur.com/|
+| tech  | type               | url                                     | pattern    |
+| ----- | ------------------ | --------------------------------------- | ---------- |
+| rimgo | domain replacement | https://anaimg.starbeamrainbowlabs.com/ | imgur.com/ |
+| rimgo | domain replacement | https://imgur.artemislena.eu/           | imgur.com/ |
+| rimgo | domain replacement | https://imgur.nerdvpn.de/               | imgur.com/ |
+| rimgo | domain replacement | https://r.opnxng.com/                   | imgur.com/ |
+| rimgo | domain replacement | https://rimgo.bloat.cat/                | imgur.com/ |
+| rimgo | domain replacement | https://rimgo.canine.tools/             | imgur.com/ |
+| rimgo | domain replacement | https://rimgo.catsarch.com/             | imgur.com/ |
+| rimgo | domain replacement | https://rimgo.reallyaweso.me/           | imgur.com/ |
+| rimgo | domain replacement | https://rimgo.privacyredirect.com       | imgur.com/ |
 
 - More rimgo instances https://codeberg.org/rimgo/instances
 - More rimgo instances https://rimgo.codeberg.page/
