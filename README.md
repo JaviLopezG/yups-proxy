@@ -149,8 +149,6 @@ contribute improvements.
 
 - GitHub:
   [https://github.com/javilopezg/yups-proxy](https://github.com/javilopezg/yups-proxy)
-- Forgejo:
-  [https://code.javilopezg.com/javilopezg/yups-proxy](https://code.javilopezg.com/javilopezg/yups-proxy)
 - Maintainer: Javi López ([mail@javilopezg.com](mailto:mail@javilopezg.com))
 
 ## License
