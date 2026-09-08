@@ -1,0 +1,8 @@
+# Binaries
+yups
+
+# Temporary and junk files
+*.kk
+
+# Local environment
+.env
