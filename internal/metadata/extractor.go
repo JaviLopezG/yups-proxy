@@ -94,27 +94,23 @@ func ExtractFromHTML(body io.Reader, rawURL string) (*CardData, error) {
 				}
 
 				switch name {
-				case "twitter:title":
+				case "twitter:title", "title":
 					if card.Title == "" {
 						card.Title = content
 					}
-				case "twitter:description":
+				case "twitter:description", "description":
 					if card.Description == "" {
 						card.Description = content
 					}
-				case "twitter:image", "twitter:image:src":
+				case "twitter:image", "twitter:image:src", "image":
 					if card.Image == "" {
 						card.Image = resolveURL(parsedURL, content)
-					}
-				case "description":
-					if card.Description == "" {
-						card.Description = content
 					}
 				}
 			}
 
-			// If we entered <body>, stop to save time
-			if tagName == "body" {
+			// If we entered <body> and already extracted title and image, stop early
+			if tagName == "body" && card.Title != "" && card.Image != "" {
 				finalizeCard(card, titleText, parsedURL)
 				return card, nil
 			}
