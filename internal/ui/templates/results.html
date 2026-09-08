@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ .Card.Title }} - YUPS Proxy</title>
+    
+    <!-- Open Graph & Smart Card Tags -->
+    <meta property="og:title" content="{{ .Card.Title }}">
+    <meta property="og:description" content="{{ .Card.Description }}">
+    <meta property="og:image" content="{{ .Card.Image }}">
+    <meta property="og:url" content="{{ .Card.URL }}">
+    <meta property="og:site_name" content="YUPS - {{ .Card.SiteName }}">
+    <meta property="og:type" content="article">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ .Card.Title }}">
+    <meta name="twitter:description" content="{{ .Card.Description }}">
+    <meta name="twitter:image" content="{{ .Card.Image }}">
+
+    <!-- Favicons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/icons/logo-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/static/icons/logo-16.png">
+    <link rel="icon" type="image/x-icon" href="/static/icons/favicon-32.ico">
+    <link rel="apple-touch-icon" sizes="128x128" href="/static/icons/logo-128.png">
+
+    <style>
+        :root {
+            --primary-brown: #EAB796;
+            --detail-brown: #9E5A2E;
+            --dark-brown: #4A2810;
+            --bg-color: #FAF6F0;
+            --card-bg: #FFFFFF;
+            --text-color: #2D241E;
+            --muted-text: #7D6B5D;
+            --border-color: #E2D5C8;
+            --shadow-sm: 0 2px 4px rgba(74, 40, 16, 0.06);
+            --shadow-md: 0 4px 12px rgba(74, 40, 16, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        header {
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: var(--detail-brown);
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        .header-logo {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+        }
+
+        .back-link {
+            text-decoration: none;
+            color: var(--detail-brown);
+            font-size: 0.9rem;
+            font-weight: 600;
+            padding: 6px 14px;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-color);
+            transition: all 0.15s ease;
+        }
+
+        .back-link:hover {
+            background-color: #F3EBE1;
+            border-color: var(--detail-brown);
+        }
+
+        main {
+            flex: 1;
+            max-width: 860px;
+            width: 100%;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        /* Smart Card Preview */
+        .smart-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        .smart-card-img-container {
+            width: 100%;
+            max-height: 320px;
+            overflow: hidden;
+            background-color: #F2E8DC;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .smart-card-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            max-height: 320px;
+        }
+
+        .smart-card-body {
+            padding: 24px;
+        }
+
+        .smart-card-badge {
+            display: inline-block;
+            background-color: var(--primary-brown);
+            color: var(--dark-brown);
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+        }
+
+        .smart-card-title {
+            font-size: 1.35rem;
+            font-weight: 700;
+            line-height: 1.3;
+            margin-bottom: 10px;
+        }
+
+        .smart-card-title a {
+            color: var(--text-color);
+            text-decoration: none;
+        }
+
+        .smart-card-title a:hover {
+            color: var(--detail-brown);
+            text-decoration: underline;
+        }
+
+        .smart-card-desc {
+            color: var(--muted-text);
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin-bottom: 16px;
+        }
+
+        .smart-card-meta {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-size: 0.8rem;
+            color: #8C7B6E;
+            border-top: 1px solid #F0E6DC;
+            padding-top: 12px;
+            flex-wrap: wrap;
+        }
+
+        /* Proxies Section */
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--detail-brown);
+        }
+
+        .proxy-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 16px;
+        }
+
+        .proxy-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 18px;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .proxy-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--detail-brown);
+        }
+
+        .proxy-tech-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--dark-brown);
+            margin-bottom: 6px;
+            text-transform: capitalize;
+        }
+
+        .proxy-desc {
+            font-size: 0.85rem;
+            color: var(--muted-text);
+            margin-bottom: 14px;
+            flex: 1;
+        }
+
+        .proxy-dest-url {
+            font-size: 0.75rem;
+            font-family: monospace;
+            color: #8C7B6E;
+            word-break: break-all;
+            margin-bottom: 12px;
+            background: #F8F3EC;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        .btn-visit {
+            display: block;
+            text-align: center;
+            background-color: var(--primary-brown);
+            color: var(--dark-brown);
+            font-weight: 600;
+            font-size: 0.9rem;
+            padding: 8px 16px;
+            border-radius: 18px;
+            text-decoration: none;
+            border: 1px solid #D6A382;
+            transition: background 0.15s ease;
+        }
+
+        .btn-visit:hover {
+            background-color: #E2AA88;
+        }
+
+        footer {
+            border-top: 1px solid var(--border-color);
+            padding: 18px 20px;
+            font-size: 0.85rem;
+            color: var(--muted-text);
+            text-align: center;
+            background-color: rgba(255, 255, 255, 0.5);
+            margin-top: 40px;
+        }
+
+        footer a {
+            color: var(--detail-brown);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 6px;
+            flex-wrap: wrap;
+        }
+
+        @media (max-width: 600px) {
+            .smart-card-title {
+                font-size: 1.15rem;
+            }
+            .smart-card-body {
+                padding: 16px;
+            }
+            .proxy-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="/" class="header-brand">
+            <img src="/static/logo.png" alt="YUPS Logo" class="header-logo">
+            <span>YUPS</span>
+        </a>
+        <a href="/" class="back-link">← New Search</a>
+    </header>
+
+    <main>
+        <!-- Smart Card Preview -->
+        <div class="smart-card">
+            {{ if .Card.Image }}
+            <div class="smart-card-img-container">
+                <img src="{{ .Card.Image }}" alt="Preview image" class="smart-card-img" onerror="this.src='/static/logo.png'">
+            </div>
+            {{ end }}
+            <div class="smart-card-body">
+                <span class="smart-card-badge">{{ .Service }}</span>
+                <h2 class="smart-card-title">
+                    <a href="{{ .Card.URL }}" target="_blank" rel="noopener noreferrer">{{ .Card.Title }}</a>
+                </h2>
+                <p class="smart-card-desc">{{ .Card.Description }}</p>
+                <div class="smart-card-meta">
+                    <span><strong>Source:</strong> {{ .Card.SiteName }}</span>
+                    <span>•</span>
+                    <span><strong>First seen:</strong> {{ .FirstSeenFormatted }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Available Proxies -->
+        <div class="section-header">
+            <h3 class="section-title">Available Proxy Mirrors ({{ len .Proxies }})</h3>
+        </div>
+
+        <div class="proxy-grid">
+            {{ range .Proxies }}
+            <div class="proxy-card">
+                <div>
+                    <div class="proxy-tech-title">{{ .Tech }}</div>
+                    <p class="proxy-desc">{{ .Description }}</p>
+                    <div class="proxy-dest-url">{{ .DestinationURL }}</div>
+                </div>
+                <a href="{{ .DestinationURL }}" target="_blank" rel="noopener noreferrer" class="btn-visit">
+                    Open in {{ .Tech }} →
+                </a>
+            </div>
+            {{ end }}
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-links">
+            <a href="https://github.com/javilopezg/yups-proxy" target="_blank" rel="noopener noreferrer">GitHub Repository</a>
+            <span>•</span>
+            <a href="mailto:mail@javilopezg.com">mail@javilopezg.com</a>
+            <span>•</span>
+            <span>BSD-3-Clause License</span>
+        </div>
+        <div>
+            YUPS • Accessible, open and privacy-respecting web aggregation
+        </div>
+    </footer>
+</body>
+</html>
