@@ -165,3 +165,30 @@ func TestSSRFBlocking(t *testing.T) {
 		t.Fatalf("expected SSRF error when accessing loopback address %s, but got nil", ts.URL)
 	}
 }
+
+func TestChooseScraperUserAgent(t *testing.T) {
+	tests := []struct {
+		host        string
+		expectedSub string
+	}{
+		{"instagram.com", "Twitterbot"},
+		{"www.instagram.com", "Twitterbot"},
+		{"facebook.com", "Twitterbot"},
+		{"threads.net", "Twitterbot"},
+		{"whatsapp.com", "Twitterbot"},
+		{"youtube.com", "facebookexternalhit"},
+		{"reddit.com", "facebookexternalhit"},
+		{"elpais.com", "facebookexternalhit"},
+		{"medium.com", "facebookexternalhit"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.host, func(t *testing.T) {
+			ua := chooseScraperUserAgent(tt.host)
+			if !strings.Contains(ua, tt.expectedSub) {
+				t.Errorf("for host %s: expected UA containing %s, got %s", tt.host, tt.expectedSub, ua)
+			}
+		})
+	}
+}
+
