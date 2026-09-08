@@ -4,8 +4,10 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
+	"strings"
 	"sync"
 	"time"
 )
@@ -80,33 +82,70 @@ func (c *Cache) GetOrFetch(ctx context.Context, targetURL string) *CardData {
 	return card
 }
 
+func chooseScraperUserAgent(targetHost string) string {
+	targetHost = strings.ToLower(strings.TrimPrefix(targetHost, "www."))
+	metaDomains := []string{
+		"instagram.com",
+		"instagr.am",
+		"facebook.com",
+		"fb.com",
+		"fb.watch",
+		"whatsapp.com",
+		"threads.net",
+	}
+
+	for _, domain := range metaDomains {
+		if targetHost == domain || strings.HasSuffix(targetHost, "."+domain) {
+			return "Twitterbot/1.0"
+		}
+	}
+
+	return "facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)"
+}
+
 func (c *Cache) fetch(ctx context.Context, targetURL string) *CardData {
 	parsed, err := url.Parse(targetURL)
 	if err != nil {
+		log.Printf("[YUPS SCRAPER] INVALID URL | %s: %v", targetURL, err)
 		return defaultFallbackCard(targetURL, "Unknown")
 	}
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, targetURL, nil)
 	if err != nil {
+		log.Printf("[YUPS SCRAPER] REQ ERROR | %s: %v", targetURL, err)
 		return defaultFallbackCard(targetURL, parsed.Hostname())
 	}
 
-	// Realistic browser UA to obtain OG tags without getting 403
-	req.Header.Set("User-Agent", "Mozilla/5.0 (compatible; YupsBot/1.0; +https://yups.io)")
+	ua := chooseScraperUserAgent(parsed.Hostname())
+	req.Header.Set("User-Agent", ua)
 	req.Header.Set("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
+	req.Header.Set("Accept-Language", "en-US,en;q=0.9,es;q=0.8")
 
+	start := time.Now()
 	resp, err := c.client.Do(req)
+	duration := time.Since(start).Round(time.Millisecond)
+
 	if err != nil {
+		log.Printf("[YUPS SCRAPER] ERROR (%v) | ua=%s | %s: %v", duration, ua, targetURL, err)
 		return defaultFallbackCard(targetURL, parsed.Hostname())
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		log.Printf("[YUPS SCRAPER] HTTP %d (%v) | ua=%s | %s", resp.StatusCode, duration, ua, targetURL)
+		return defaultFallbackCard(targetURL, parsed.Hostname())
+	}
 
 	// Read at most 512KB to avoid unbounded memory consumption
 	limitedReader := io.LimitReader(resp.Body, 512*1024)
 	extracted, err := ExtractFromHTML(limitedReader, targetURL)
 	if err != nil {
+		log.Printf("[YUPS SCRAPER] PARSE ERROR (%v) | %s: %v", duration, targetURL, err)
 		return defaultFallbackCard(targetURL, parsed.Hostname())
 	}
+
+	log.Printf("[YUPS SCRAPER] OK 200 (%v) | %s -> title=%q, image=%q",
+		duration, targetURL, extracted.Title, extracted.Image)
 
 	return extracted
 }
