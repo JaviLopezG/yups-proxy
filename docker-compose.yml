@@ -1,0 +1,21 @@
+services:
+  yups:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: javilopezg/yups:latest
+    container_name: yups
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=8080
+      - HOST=0.0.0.0
+      - BASE_URL=https://yups.io
+      - YUPS_ACCESS_LOG=true
+      - CACHE_TTL=24h
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "-", "http://127.0.0.1:8080/healthz"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
