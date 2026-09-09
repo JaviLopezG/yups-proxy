@@ -1,6 +1,6 @@
 service,tech,type,proxy_url,patterns,description
-general,archive.is,query_param,https://archive.is/submit?url=,*,Archive.is web snapshot proxy
-general,archive.ph,query_param,https://archive.ph/submit?url=,*,Archive.ph web snapshot proxy
+general,archive.is,query_param,https://archive.is/submit/?url=,*,Archive.is web snapshot proxy
+general,archive.ph,query_param,https://archive.ph/submit/?url=,*,Archive.ph web snapshot proxy
 twitter,shitter,domain_replace,https://shitter.thepixora.com/,"x.com,twitter.com,xcancel.com,nitter.net,fixupx.com,vxtwitter.com",Shitter Twitter frontend
 twitter,nitter,domain_replace,https://nitter.kareem.one/,"x.com,twitter.com,xcancel.com,nitter.net,fixupx.com,vxtwitter.com",Nitter instance by Kareem
 twitter,dog nitter,domain_replace,https://nitter.miningtcup.me/,"x.com,twitter.com,xcancel.com,nitter.net,fixupx.com,vxtwitter.com",Dog Nitter instance
