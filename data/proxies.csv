@@ -1,17 +1,17 @@
 service,tech,type,proxy_url,patterns,description
-general,archive.is,query_param,https://archive.is/?url=,*,Archive.is web snapshot proxy
-general,archive.ph,query_param,https://archive.ph/?url=,*,Archive.ph web snapshot proxy
-twitter,shitter,domain_replace,https://shitter.thepixora.com/,"x.com,twitter.com,xcancel.com,nitter.net",Shitter Twitter frontend
-twitter,nitter,domain_replace,https://nitter.kareem.one/,"x.com,twitter.com,xcancel.com,nitter.net",Nitter instance by Kareem
-twitter,dog nitter,domain_replace,https://nitter.miningtcup.me/,"x.com,twitter.com,xcancel.com,nitter.net",Dog Nitter instance
-twitter,nitter,domain_replace,https://nitter.meowing.monster/,"x.com,twitter.com,xcancel.com,nitter.net",Nitter instance Meowing Monster
-twitter,nitter,domain_replace,https://nitter.xitter.cc/,"x.com,twitter.com,xcancel.com,nitter.net",Nitter Xitter instance
-twitter,nitter,domain_replace,https://lightbrd.com/,"x.com,twitter.com,xcancel.com,nitter.net",Lightbrd Twitter frontend
-twitter,nitter,domain_replace,https://nitter.click/,"x.com,twitter.com,xcancel.com,nitter.net",Nitter click instance
-twitter,nitter,domain_replace,https://x.n0g.xyz/,"x.com,twitter.com,xcancel.com,nitter.net",Nitter n0g instance
-twitter,kitter,domain_replace,https://tw.eir-nya.gay/,"x.com,twitter.com,xcancel.com,nitter.net",Kitter Twitter frontend
-twitter,nitter,domain_replace,https://nitter.net/,"x.com,twitter.com,xcancel.com,nitter.net",Official Nitter instance
-twitter,xcancel,domain_replace,https://xcancel.com/,"x.com,twitter.com,nitter.net",XCancel Twitter frontend
+general,archive.is,query_param,https://archive.is/submit?url=,*,Archive.is web snapshot proxy
+general,archive.ph,query_param,https://archive.ph/submit?url=,*,Archive.ph web snapshot proxy
+twitter,shitter,domain_replace,https://shitter.thepixora.com/,"x.com,twitter.com,xcancel.com,nitter.net,fixupx.com,vxtwitter.com",Shitter Twitter frontend
+twitter,nitter,domain_replace,https://nitter.kareem.one/,"x.com,twitter.com,xcancel.com,nitter.net,fixupx.com,vxtwitter.com",Nitter instance by Kareem
+twitter,dog nitter,domain_replace,https://nitter.miningtcup.me/,"x.com,twitter.com,xcancel.com,nitter.net,fixupx.com,vxtwitter.com",Dog Nitter instance
+twitter,nitter,domain_replace,https://nitter.meowing.monster/,"x.com,twitter.com,xcancel.com,nitter.net,fixupx.com,vxtwitter.com",Nitter instance Meowing Monster
+twitter,nitter,domain_replace,https://nitter.xitter.cc/,"x.com,twitter.com,xcancel.com,nitter.net,fixupx.com,vxtwitter.com",Nitter Xitter instance
+twitter,nitter,domain_replace,https://lightbrd.com/,"x.com,twitter.com,xcancel.com,nitter.net,fixupx.com,vxtwitter.com",Lightbrd Twitter frontend
+twitter,nitter,domain_replace,https://nitter.click/,"x.com,twitter.com,xcancel.com,nitter.net,fixupx.com,vxtwitter.com",Nitter click instance
+twitter,nitter,domain_replace,https://x.n0g.xyz/,"x.com,twitter.com,xcancel.com,nitter.net,fixupx.com,vxtwitter.com",Nitter n0g instance
+twitter,kitter,domain_replace,https://tw.eir-nya.gay/,"x.com,twitter.com,xcancel.com,nitter.net,fixupx.com,vxtwitter.com",Kitter Twitter frontend
+twitter,nitter,domain_replace,https://nitter.net/,"x.com,twitter.com,xcancel.com,nitter.net,fixupx.com,vxtwitter.com",Official Nitter instance
+twitter,xcancel,domain_replace,https://xcancel.com/,"x.com,twitter.com,nitter.net,fixupx.com,vxtwitter.com",XCancel Twitter frontend
 youtube,invidious,domain_replace,https://invidious.nerdvpn.de/,"youtube.com,youtu.be,m.youtube.com",Invidious instance by NerdVPN
 youtube,invidious,domain_replace,https://invidious.tiekoetter.com/,"youtube.com,youtu.be,m.youtube.com",Invidious instance Tiekoetter
 youtube,invidious,domain_replace,https://inv.nadeko.net/,"youtube.com,youtu.be,m.youtube.com",Invidious instance Nadeko
