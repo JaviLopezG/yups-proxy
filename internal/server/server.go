@@ -3,7 +3,9 @@ package server
 import (
 	"fmt"
 	"log"
+	"net"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 
@@ -57,6 +59,9 @@ func (s *Server) routes() {
 	// Health check
 	s.mux.HandleFunc("/healthz", s.handleHealthz)
 
+	// Help and user guide
+	s.mux.HandleFunc("/help", s.handleHelp)
+
 	// Explicit proxy links endpoint
 	s.mux.HandleFunc("/links", s.handleLinks)
 
@@ -66,7 +71,14 @@ func (s *Server) routes() {
 
 // Handler returns the HTTP handler with logging middleware wrapped.
 func (s *Server) Handler() http.Handler {
-	return s.loggingMiddleware(s.mux)
+	recoveryWrapper := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Intercept path recovery before http.ServeMux collapses double slashes or redirects
+		if s.tryPathRecovery(w, r) {
+			return
+		}
+		s.mux.ServeHTTP(w, r)
+	})
+	return s.loggingMiddleware(recoveryWrapper)
 }
 
 // responseRecorder captures the status code for logging.
@@ -138,35 +150,91 @@ func (s *Server) handleHealthz(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("OK"))
 }
 
+func (s *Server) handleHelp(w http.ResponseWriter, r *http.Request) {
+	if rec, ok := w.(*responseRecorder); ok {
+		rec.action = "HELP"
+	}
+	if err := s.renderer.RenderHelp(w, ui.HelpViewData{BaseURL: s.config.BaseURL}, http.StatusOK); err != nil {
+		http.Error(w, "Failed to render help page", http.StatusInternalServerError)
+	}
+}
+
 func (s *Server) handleLinks(w http.ResponseWriter, r *http.Request) {
 	s.serveResultsOrRedirect(w, r, true)
 }
 
 func (s *Server) handleRoot(w http.ResponseWriter, r *http.Request) {
-	// Only handle exact root "/"
+	// 1. Non-root paths: try path recovery (e.g. /https://...) or render 404 help page
 	if r.URL.Path != "/" {
-		http.NotFound(w, r)
-		return
-	}
-
-	rawURL := strings.TrimSpace(r.URL.Query().Get("url"))
-	if rawURL == "" {
+		if s.tryPathRecovery(w, r) {
+			return
+		}
 		if rec, ok := w.(*responseRecorder); ok {
-			rec.action = "HOME"
+			rec.action = "NOT_FOUND"
 		}
-		if err := s.renderer.RenderIndex(w); err != nil {
-			http.Error(w, "Failed to render home page", http.StatusInternalServerError)
+		if err := s.renderer.RenderHelp(w, ui.HelpViewData{
+			ErrorMessage: "The requested page or resource could not be found (404).",
+			BaseURL:      s.config.BaseURL,
+		}, http.StatusNotFound); err != nil {
+			http.NotFound(w, r)
 		}
 		return
 	}
 
-	// Determine if user explicitly requested links page
-	action := r.URL.Query().Get("action")
-	view := r.URL.Query().Get("view")
-	mode := r.URL.Query().Get("mode")
-	isLinks := action == "links" || view == "links" || mode == "links"
+	// 2. Query parameter recovery & handling on "/"
+	query := r.URL.Query()
+	rawURL := strings.TrimSpace(query.Get("url"))
 
-	s.serveResultsOrRedirect(w, r, isLinks)
+	if rawURL != "" {
+		// Case 4: Extra query parameters when url is present
+		if hasExtraParams(query) {
+			if rec, ok := w.(*responseRecorder); ok {
+				rec.action = "RECOVERY_EXTRA_PARAMS"
+			}
+			http.Redirect(w, r, "/?url="+url.QueryEscape(rawURL)+"&action=links", http.StatusTemporaryRedirect)
+			return
+		}
+
+		// Canonical request with url
+		action := query.Get("action")
+		view := query.Get("view")
+		mode := query.Get("mode")
+		isLinks := action == "links" || view == "links" || mode == "links"
+
+		s.serveResultsOrRedirect(w, r, isLinks)
+		return
+	}
+
+	// rawURL is empty: check if query string can be recovered (Cases 2 and 3)
+	if s.tryQueryRecovery(w, r) {
+		return
+	}
+
+	// If query was provided but could not be recovered, render help with 400 Bad Request
+	if strings.TrimSpace(r.URL.RawQuery) != "" {
+		if rec, ok := w.(*responseRecorder); ok {
+			rec.action = "INVALID_QUERY"
+		}
+		if err := s.renderer.RenderHelp(w, ui.HelpViewData{
+			ErrorMessage: "We could not recognize a valid URL from your request. Check out the usage guide below.",
+			BaseURL:      s.config.BaseURL,
+		}, http.StatusBadRequest); err != nil {
+			http.Error(w, "Invalid URL request", http.StatusBadRequest)
+		}
+		return
+	}
+
+	// Clean home page
+	if rec, ok := w.(*responseRecorder); ok {
+		rec.action = "HOME"
+	}
+	prefix := s.config.BaseURL + "?url="
+	if s.config.BaseURL == "" {
+		prefix = "https://yups.io?url="
+	}
+	if err := s.renderer.RenderIndex(w, ui.IndexViewData{PrefixURL: prefix}); err != nil {
+		http.Error(w, "Failed to render home page", http.StatusInternalServerError)
+	}
 }
 
 func (s *Server) serveResultsOrRedirect(w http.ResponseWriter, r *http.Request, forceResults bool) {
@@ -178,7 +246,15 @@ func (s *Server) serveResultsOrRedirect(w http.ResponseWriter, r *http.Request, 
 
 	normURL, err := proxy.NormalizeURL(rawURL)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Invalid URL provided: %v", err), http.StatusBadRequest)
+		if rec, ok := w.(*responseRecorder); ok {
+			rec.action = "INVALID_URL"
+		}
+		if errRender := s.renderer.RenderHelp(w, ui.HelpViewData{
+			ErrorMessage: fmt.Sprintf("Invalid URL provided: %v", err),
+			BaseURL:      s.config.BaseURL,
+		}, http.StatusBadRequest); errRender != nil {
+			http.Error(w, fmt.Sprintf("Invalid URL provided: %v", err), http.StatusBadRequest)
+		}
 		return
 	}
 
@@ -269,4 +345,164 @@ func (s *Server) serveResultsPage(w http.ResponseWriter, r *http.Request, normUR
 	if err := s.renderer.RenderResults(w, data); err != nil {
 		http.Error(w, "Failed to render preview", http.StatusInternalServerError)
 	}
+}
+
+func (s *Server) tryPathRecovery(w http.ResponseWriter, r *http.Request) bool {
+	reqURI := r.RequestURI
+	if strings.HasPrefix(reqURI, "http://") || strings.HasPrefix(reqURI, "https://") {
+		if u, err := url.Parse(reqURI); err == nil {
+			reqURI = u.RequestURI()
+		}
+	}
+	raw := strings.TrimPrefix(reqURI, "/")
+	if raw == "" {
+		raw = strings.TrimPrefix(r.URL.Path, "/")
+	}
+
+	lowerRaw := strings.ToLower(raw)
+	if !strings.HasPrefix(lowerRaw, "http") {
+		return false
+	}
+
+	// Fix collapsed slashes if needed (e.g. http:/ -> http:// or https:/ -> https://)
+	if strings.HasPrefix(lowerRaw, "http:/") && !strings.HasPrefix(lowerRaw, "http://") {
+		raw = "http://" + raw[6:]
+	} else if strings.HasPrefix(lowerRaw, "https:/") && !strings.HasPrefix(lowerRaw, "https://") {
+		raw = "https://" + raw[7:]
+	} else if strings.HasPrefix(lowerRaw, "http%3a") || strings.HasPrefix(lowerRaw, "https%3a") {
+		if unescaped, err := url.PathUnescape(raw); err == nil {
+			raw = unescaped
+		}
+	}
+
+	if !isValidTargetURL(raw) {
+		return false
+	}
+
+	if rec, ok := w.(*responseRecorder); ok {
+		rec.action = "RECOVERY_PATH"
+	}
+	http.Redirect(w, r, "/?url="+url.QueryEscape(raw), http.StatusTemporaryRedirect)
+	return true
+}
+
+func (s *Server) tryQueryRecovery(w http.ResponseWriter, r *http.Request) bool {
+	rawQuery := strings.TrimSpace(r.URL.RawQuery)
+	if rawQuery == "" {
+		return false
+	}
+
+	// Case 2: Query string without parameter name e.g. ?https://twitter.com or ?twitter.com/user or ?https://youtube.com/watch?v=123
+	lowerQuery := strings.ToLower(rawQuery)
+	isRawURLQuery := !strings.Contains(rawQuery, "=") ||
+		strings.HasPrefix(lowerQuery, "http://") ||
+		strings.HasPrefix(lowerQuery, "https://") ||
+		strings.HasPrefix(lowerQuery, "http%3a") ||
+		strings.HasPrefix(lowerQuery, "https%3a")
+
+	if isRawURLQuery {
+		candidate := rawQuery
+		if strings.HasPrefix(lowerQuery, "http%3a") || strings.HasPrefix(lowerQuery, "https%3a") {
+			if unescaped, err := url.QueryUnescape(candidate); err == nil {
+				candidate = unescaped
+			}
+		}
+		if isValidTargetURL(candidate) {
+			if rec, ok := w.(*responseRecorder); ok {
+				rec.action = "RECOVERY_RAW_QUERY"
+			}
+			http.Redirect(w, r, "/?url="+url.QueryEscape(candidate), http.StatusTemporaryRedirect)
+			return true
+		}
+	}
+
+	// Case 3: Query parameter that is not "url", but "url" is missing e.g. ?u=laUrl
+	query := r.URL.Query()
+	if len(query) > 0 {
+		var candidate string
+		// Common parameter aliases
+		aliases := []string{"u", "uri", "link", "target", "q", "dest", "destination", "address", "page", "site", "href"}
+		for _, alias := range aliases {
+			if val := strings.TrimSpace(query.Get(alias)); val != "" {
+				candidate = val
+				break
+			}
+		}
+
+		// Look for any parameter value matching a valid target URL
+		if candidate == "" {
+			for k, vals := range query {
+				lk := strings.ToLower(k)
+				if lk == "action" || lk == "view" || lk == "mode" {
+					continue
+				}
+				for _, v := range vals {
+					v = strings.TrimSpace(v)
+					if v != "" && isValidTargetURL(v) {
+						candidate = v
+						break
+					}
+				}
+				if candidate != "" {
+					break
+				}
+			}
+		}
+
+		// Look for first non-empty param value
+		if candidate == "" {
+			for k, vals := range query {
+				lk := strings.ToLower(k)
+				if lk == "action" || lk == "view" || lk == "mode" {
+					continue
+				}
+				for _, v := range vals {
+					v = strings.TrimSpace(v)
+					if v != "" {
+						candidate = v
+						break
+					}
+				}
+				if candidate != "" {
+					break
+				}
+			}
+		}
+
+		if candidate != "" && isValidTargetURL(candidate) {
+			if rec, ok := w.(*responseRecorder); ok {
+				rec.action = "RECOVERY_PARAM"
+			}
+			http.Redirect(w, r, "/?url="+url.QueryEscape(candidate), http.StatusTemporaryRedirect)
+			return true
+		}
+	}
+
+	return false
+}
+
+func hasExtraParams(query url.Values) bool {
+	for k := range query {
+		lk := strings.ToLower(k)
+		switch lk {
+		case "url", "action", "view", "mode":
+			// Allowed canonical parameters
+		default:
+			return true
+		}
+	}
+	return false
+}
+
+func isValidTargetURL(raw string) bool {
+	norm, err := proxy.NormalizeURL(raw)
+	if err != nil {
+		return false
+	}
+	u, err := url.Parse(norm)
+	if err != nil || u.Host == "" {
+		return false
+	}
+	hostname := u.Hostname()
+	return strings.Contains(hostname, ".") || hostname == "localhost" || net.ParseIP(hostname) != nil
 }

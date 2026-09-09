@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Use YUPS - Your Unified Proxy Service</title>
+    <meta name="description" content="Step-by-step guide on how to use YUPS to access and share web content via privacy-preserving proxies.">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="How to Use YUPS - Help & Guide">
+    <meta property="og:description" content="Step-by-step guide on how to use YUPS to access and share web content via privacy-preserving proxies.">
+    <meta property="og:image" content="/static/logo.png">
+    <meta property="og:type" content="website">
+
+    <!-- Favicons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/icons/logo-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/static/icons/logo-16.png">
+    <link rel="icon" type="image/x-icon" href="/static/icons/favicon-32.ico">
+
+    <style>
+        :root {
+            --primary-brown: #EAB796;
+            --detail-brown: #9E5A2E;
+            --dark-brown: #4A2810;
+            --bg-color: #FAF6F0;
+            --card-bg: #FFFFFF;
+            --text-color: #2D241E;
+            --muted-text: #7D6B5D;
+            --border-color: #E2D5C8;
+            --shadow-sm: 0 2px 4px rgba(74, 40, 16, 0.06);
+            --shadow-md: 0 4px 12px rgba(74, 40, 16, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        header {
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: var(--detail-brown);
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        .header-logo {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+        }
+
+        .back-link {
+            text-decoration: none;
+            color: var(--detail-brown);
+            font-size: 0.9rem;
+            font-weight: 600;
+            padding: 6px 14px;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-color);
+            transition: all 0.15s ease;
+        }
+
+        .back-link:hover {
+            background-color: #F3EBE1;
+            border-color: var(--detail-brown);
+        }
+
+        main {
+            flex: 1;
+            max-width: 800px;
+            width: 100%;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .alert-box {
+            background: #FFF3CD;
+            border: 1px solid #FFEBAA;
+            border-radius: 12px;
+            padding: 18px 22px;
+            margin-bottom: 28px;
+            color: #856404;
+        }
+
+        .alert-box h3 {
+            font-size: 1.1rem;
+            margin-bottom: 6px;
+            color: #664D03;
+        }
+
+        .alert-box p {
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+
+        .guide-header {
+            text-align: center;
+            margin-bottom: 36px;
+        }
+
+        .guide-header h1 {
+            font-size: 2.1rem;
+            font-weight: 800;
+            color: var(--dark-brown);
+            margin-bottom: 10px;
+        }
+
+        .guide-header p {
+            font-size: 1.05rem;
+            color: var(--muted-text);
+            line-height: 1.5;
+        }
+
+        .steps-container {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .step-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            gap: 20px;
+        }
+
+        .step-number {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background-color: var(--primary-brown);
+            color: var(--dark-brown);
+            font-weight: 800;
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .step-content {
+            flex: 1;
+        }
+
+        .step-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--detail-brown);
+            margin-bottom: 8px;
+        }
+
+        .step-desc {
+            font-size: 0.95rem;
+            color: var(--text-color);
+            line-height: 1.5;
+            margin-bottom: 14px;
+        }
+
+        .code-box {
+            background: #F6F1EA;
+            border: 1px solid #E5DBD0;
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-family: SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.88rem;
+            color: #3D2C1E;
+            word-break: break-all;
+        }
+
+        .highlight-part {
+            background-color: #FFE082;
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin-top: 14px;
+        }
+
+        .feature-box {
+            background: #FAF7F2;
+            border: 1px solid #EADFD5;
+            border-radius: 10px;
+            padding: 14px;
+        }
+
+        .feature-box strong {
+            display: block;
+            margin-bottom: 4px;
+            color: var(--detail-brown);
+        }
+
+        .feature-box p {
+            font-size: 0.88rem;
+            color: var(--muted-text);
+            line-height: 1.4;
+        }
+
+        .action-center {
+            text-align: center;
+            margin-top: 36px;
+        }
+
+        .btn-home {
+            background-color: var(--primary-brown);
+            color: var(--dark-brown);
+            font-size: 1.05rem;
+            font-weight: 700;
+            padding: 12px 32px;
+            border-radius: 24px;
+            text-decoration: none;
+            display: inline-block;
+            border: 1px solid #D6A382;
+            transition: all 0.15s ease;
+        }
+
+        .btn-home:hover {
+            background-color: #E2AA88;
+            box-shadow: var(--shadow-sm);
+        }
+
+        footer {
+            border-top: 1px solid var(--border-color);
+            padding: 18px 20px;
+            font-size: 0.85rem;
+            color: var(--muted-text);
+            text-align: center;
+            background-color: rgba(255, 255, 255, 0.5);
+            margin-top: 40px;
+        }
+
+        footer a {
+            color: var(--detail-brown);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 6px;
+            flex-wrap: wrap;
+        }
+
+        @media (max-width: 600px) {
+            .step-card {
+                flex-direction: column;
+                gap: 12px;
+            }
+            .step-number {
+                width: 36px;
+                height: 36px;
+                font-size: 1.1rem;
+            }
+            .guide-header h1 {
+                font-size: 1.7rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="/" class="header-brand">
+            <img src="/static/logo.png" alt="YUPS Logo" class="header-logo">
+            <span>YUPS</span>
+        </a>
+        <a href="/" class="back-link">← Home</a>
+    </header>
+
+    <main>
+        {{ if .ErrorMessage }}
+        <div class="alert-box">
+            <h3>Notice</h3>
+            <p>{{ .ErrorMessage }}</p>
+        </div>
+        {{ end }}
+
+        <div class="guide-header">
+            <h1>How to Use YUPS</h1>
+            <p>Your Unified Proxy Service bridges the web to privacy-respecting, fast, and open alternatives.</p>
+        </div>
+
+        <div class="steps-container">
+            <!-- Step 1 -->
+            <div class="step-card">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h2 class="step-title">Get any link</h2>
+                    <p class="step-desc">
+                        Find an article, tweet, post, or video that you want to open privately or share with friends without tracking or login walls.
+                    </p>
+                    <div class="code-box">
+                        https://www.reddit.com/r/mildlyinfuriating/comments/1wa535y/a_12_pack_of_soda_is_1299/
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="step-card">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h2 class="step-title">Prepend <code>https://yups.io?url=</code></h2>
+                    <p class="step-desc">
+                        Place the YUPS address right in front of your destination link:
+                    </p>
+                    <div class="code-box">
+                        <span class="highlight-part">https://yups.io?url=</span>https://www.reddit.com/r/mildlyinfuriating/comments/1wa535y/a_12_pack_of_soda_is_1299/
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="step-card">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h2 class="step-title">Open or share seamlessly</h2>
+                    <p class="step-desc">
+                        Depending on how you use the link, YUPS takes care of the rest automatically:
+                    </p>
+                    
+                    <div class="features-grid">
+                        <div class="feature-box">
+                            <strong>In your browser</strong>
+                            <p>You are instantly redirected to a working, fast alternative frontend (such as Redlib, Nitter, or Invidious).</p>
+                        </div>
+                        <div class="feature-box">
+                            <strong>Shared on chat apps</strong>
+                            <p>When posted on Telegram, WhatsApp, Discord, or Slack, a rich preview card with image and title is generated automatically.</p>
+                        </div>
+                        <div class="feature-box">
+                            <strong>Choose your mirror</strong>
+                            <p>Add <code>&action=links</code> to see all available mirrors and select your preferred proxy manually.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="action-center">
+            <a href="/" class="btn-home">Try it on YUPS Home →</a>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-links">
+            <a href="https://github.com/javilopezg/yups-proxy" target="_blank" rel="noopener noreferrer">GitHub Repository</a>
+            <span>•</span>
+            <a href="mailto:mail@javilopezg.com">mail@javilopezg.com</a>
+            <span>•</span>
+            <a href="/help">How it works (Help)</a>
+            <span>•</span>
+            <span>BSD-3-Clause License</span>
+        </div>
+        <div>
+            YUPS • Accessible, open and privacy-respecting web aggregation
+        </div>
+    </footer>
+</body>
+</html>

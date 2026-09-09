@@ -18,6 +18,7 @@ var staticFS embed.FS
 type Renderer struct {
 	indexTmpl   *template.Template
 	resultsTmpl *template.Template
+	helpTmpl    *template.Template
 }
 
 // NewRenderer parses and prepares embedded HTML templates.
@@ -40,16 +41,46 @@ func NewRenderer() (*Renderer, error) {
 		return nil, fmt.Errorf("failed to parse results.html: %w", err)
 	}
 
+	helpContent, err := templatesFS.ReadFile("templates/help.html")
+	if err != nil {
+		return nil, fmt.Errorf("failed to read help.html: %w", err)
+	}
+	helpTmpl, err := template.New("help").Parse(string(helpContent))
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse help.html: %w", err)
+	}
+
 	return &Renderer{
 		indexTmpl:   indexTmpl,
 		resultsTmpl: resultsTmpl,
+		helpTmpl:    helpTmpl,
 	}, nil
 }
 
+// IndexViewData contains data required to render the homepage.
+type IndexViewData struct {
+	PrefixURL string
+}
+
 // RenderIndex renders the Google-style minimal homepage.
-func (r *Renderer) RenderIndex(w http.ResponseWriter) error {
+func (r *Renderer) RenderIndex(w http.ResponseWriter, data IndexViewData) error {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	return r.indexTmpl.Execute(w, nil)
+	return r.indexTmpl.Execute(w, data)
+}
+
+// HelpViewData contains data required to render the help / step-by-step page.
+type HelpViewData struct {
+	ErrorMessage string
+	BaseURL      string
+}
+
+// RenderHelp renders the step-by-step help and guide page.
+func (r *Renderer) RenderHelp(w http.ResponseWriter, data HelpViewData, statusCode int) error {
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	if statusCode > 0 {
+		w.WriteHeader(statusCode)
+	}
+	return r.helpTmpl.Execute(w, data)
 }
 
 // ResultsViewData contains data required to render the preview/links page.

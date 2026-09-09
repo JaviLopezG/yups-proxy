@@ -112,28 +112,80 @@
         .search-box {
             position: relative;
             width: 100%;
-        }
-
-        .search-input {
-            width: 100%;
-            padding: 14px 20px;
-            font-size: 1.05rem;
+            display: flex;
+            align-items: center;
+            background: var(--card-bg);
             border: 2px solid var(--border-color);
             border-radius: 28px;
-            background: var(--card-bg);
-            color: var(--text-color);
             box-shadow: var(--shadow-sm);
-            outline: none;
             transition: border-color 0.2s, box-shadow 0.2s;
+            padding: 4px 6px 4px 16px;
         }
 
-        .search-input:focus {
+        .search-box:focus-within {
             border-color: var(--detail-brown);
             box-shadow: 0 0 0 4px rgba(158, 90, 46, 0.15);
         }
 
+        .url-prefix {
+            font-family: SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--detail-brown);
+            white-space: nowrap;
+            user-select: all;
+            cursor: pointer;
+            padding-right: 4px;
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 120px;
+            padding: 10px 10px 10px 4px;
+            font-size: 1.05rem;
+            border: none;
+            background: transparent;
+            color: var(--text-color);
+            outline: none;
+        }
+
         .search-input::placeholder {
             color: #A8988B;
+            font-size: 0.95rem;
+        }
+
+        .btn-copy {
+            background-color: #FAF6F0;
+            color: var(--detail-brown);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 7px 14px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+            transition: all 0.15s ease;
+            flex-shrink: 0;
+        }
+
+        .btn-copy:not(:disabled):hover {
+            background-color: #F3EBE1;
+            border-color: var(--detail-brown);
+        }
+
+        .btn-copy:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+            filter: grayscale(1);
+        }
+
+        .btn-copy.copied {
+            background-color: #E2F0D9;
+            color: #276A3C;
+            border-color: #A9D18E;
         }
 
         .buttons-row {
@@ -215,17 +267,34 @@
             flex-wrap: wrap;
         }
 
-        @media (max-width: 480px) {
+        @media (max-width: 600px) {
+            .search-box {
+                flex-wrap: wrap;
+                border-radius: 20px;
+                padding: 8px 12px;
+                gap: 6px;
+            }
+            .url-prefix {
+                font-size: 0.85rem;
+                width: 100%;
+                border-bottom: 1px dashed var(--border-color);
+                padding-bottom: 4px;
+            }
+            .search-input {
+                padding: 6px 0;
+                font-size: 0.95rem;
+                width: calc(100% - 90px);
+            }
+            .btn-copy {
+                padding: 6px 10px;
+                font-size: 0.8rem;
+            }
             .logo-img {
                 width: 120px;
                 height: 120px;
             }
             .brand-title {
                 font-size: 1.8rem;
-            }
-            .search-input {
-                padding: 12px 16px;
-                font-size: 0.95rem;
             }
             .buttons-row {
                 width: 100%;
@@ -247,16 +316,25 @@
 
         <form action="/" method="GET">
             <div class="search-box">
+                <span class="url-prefix" id="urlPrefix" title="Click to copy prefix">{{ if .PrefixURL }}{{ .PrefixURL }}{{ else }}https://yups.io?url={{ end }}</span>
                 <input 
                     type="text" 
                     name="url" 
+                    id="urlInput"
                     class="search-input" 
-                    placeholder="Enter URL (e.g. x.com/..., reddit.com/..., or any page)" 
+                    placeholder="x.com/..., reddit.com/..., or any page" 
                     autofocus 
                     required
                     autocomplete="off"
                     spellcheck="false"
                 >
+                <button type="button" id="copyBtn" class="btn-copy" disabled title="Copy full YUPS URL to clipboard">
+                    <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                    <span id="copyBtnText">Copy</span>
+                </button>
             </div>
             <div class="buttons-row">
                 <button type="submit" name="action" value="lucky" class="btn btn-primary">I'm feeling lucky</button>
@@ -274,11 +352,78 @@
             <span>•</span>
             <a href="mailto:mail@javilopezg.com">mail@javilopezg.com</a>
             <span>•</span>
+            <a href="/help">How it works (Help)</a>
+            <span>•</span>
             <span>BSD-3-Clause License</span>
         </div>
         <div>
             YUPS • Accessible, open and privacy-respecting web aggregation
         </div>
     </footer>
+
+    <script>
+        (function() {
+            const urlInput = document.getElementById('urlInput');
+            const copyBtn = document.getElementById('copyBtn');
+            const copyBtnText = document.getElementById('copyBtnText');
+            const urlPrefix = document.getElementById('urlPrefix');
+
+            function getPrefix() {
+                let p = urlPrefix.textContent.trim();
+                if (!p.endsWith('=')) {
+                    p = 'https://yups.io/?url=';
+                } else if (!p.includes('/?')) {
+                    p = p.replace('?url=', '/?url=');
+                }
+                return p;
+            }
+
+            function updateState() {
+                const val = urlInput.value.trim();
+                copyBtn.disabled = (val.length === 0);
+            }
+
+            urlInput.addEventListener('input', updateState);
+            urlInput.addEventListener('paste', () => setTimeout(updateState, 10));
+
+            copyBtn.addEventListener('click', async () => {
+                const val = urlInput.value.trim();
+                if (!val) return;
+
+                const fullUrl = getPrefix() + encodeURIComponent(val);
+                try {
+                    await navigator.clipboard.writeText(fullUrl);
+                    copyBtnText.textContent = 'Copied!';
+                    copyBtn.classList.add('copied');
+                    setTimeout(() => {
+                        copyBtnText.textContent = 'Copy';
+                        copyBtn.classList.remove('copied');
+                    }, 2000);
+                } catch (e) {
+                    const el = document.createElement('textarea');
+                    el.value = fullUrl;
+                    document.body.appendChild(el);
+                    el.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(el);
+                    copyBtnText.textContent = 'Copied!';
+                    copyBtn.classList.add('copied');
+                    setTimeout(() => {
+                        copyBtnText.textContent = 'Copy';
+                        copyBtn.classList.remove('copied');
+                    }, 2000);
+                }
+            });
+
+            urlPrefix.addEventListener('click', async () => {
+                try {
+                    await navigator.clipboard.writeText(urlPrefix.textContent.trim());
+                    const orig = urlPrefix.textContent;
+                    urlPrefix.textContent = 'Copied!';
+                    setTimeout(() => { urlPrefix.textContent = orig; }, 1200);
+                } catch (e) {}
+            });
+        })();
+    </script>
 </body>
 </html>
