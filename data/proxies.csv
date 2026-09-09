@@ -12,13 +12,26 @@ twitter,nitter,domain_replace,https://x.n0g.xyz/,"x.com,twitter.com,xcancel.com,
 twitter,kitter,domain_replace,https://tw.eir-nya.gay/,"x.com,twitter.com,xcancel.com,nitter.net,fixupx.com,vxtwitter.com",Kitter Twitter frontend
 twitter,nitter,domain_replace,https://nitter.net/,"x.com,twitter.com,xcancel.com,nitter.net,fixupx.com,vxtwitter.com",Official Nitter instance
 twitter,xcancel,domain_replace,https://xcancel.com/,"x.com,twitter.com,nitter.net,fixupx.com,vxtwitter.com",XCancel Twitter frontend
+twitter,nitter,domain_replace,https://nitter.jaydenha.uk/,"x.com,twitter.com,xcancel.com,nitter.net,fixupx.com,vxtwitter.com",Nitter instance Jaydenha
+twitter,nitter,domain_replace,https://nitter.tiekoetter.com/,"x.com,twitter.com,xcancel.com,nitter.net,fixupx.com,vxtwitter.com",Nitter instance Tiekoetter
+twitter,nitter,domain_replace,https://nitter.catsarch.com/,"x.com,twitter.com,xcancel.com,nitter.net,fixupx.com,vxtwitter.com",Nitter instance Catsarch
 youtube,invidious,domain_replace,https://invidious.nerdvpn.de/,"youtube.com,youtu.be,m.youtube.com",Invidious instance by NerdVPN
 youtube,invidious,domain_replace,https://invidious.tiekoetter.com/,"youtube.com,youtu.be,m.youtube.com",Invidious instance Tiekoetter
 youtube,invidious,domain_replace,https://inv.nadeko.net/,"youtube.com,youtu.be,m.youtube.com",Invidious instance Nadeko
 youtube,invidious,domain_replace,https://yt.chocolatemoo53.com/,"youtube.com,youtu.be,m.youtube.com",Invidious instance Chocolatemoo53
+youtube,invidious,domain_replace,https://invidious.f5.si/,"youtube.com,youtu.be,m.youtube.com",Invidious instance F5
+youtube,invidious,domain_replace,https://yewtu.be/,"youtube.com,youtu.be,m.youtube.com",Yewtube Invidious instance
+youtube,invidious,domain_replace,https://invidious.flokinet.to/,"youtube.com,youtu.be,m.youtube.com",Invidious instance Flokinet
 instagram,kittygram,domain_replace,https://kittygram.pussthecat.org/,"instagram.com,instagr.am",Kittygram Pussthecat instance
 instagram,imginn,domain_replace,https://imginn.com/,"instagram.com,instagr.am",Imginn Instagram viewer
 instagram,kittygram,domain_replace,https://kittygram.privacyredirect.com/,"instagram.com,instagr.am",Kittygram PrivacyRedirect instance
+instagram,kittygram,domain_replace,https://kittygr.am/,"instagram.com,instagr.am",Kittygram main instance
+instagram,kittygram,domain_replace,https://kittygram.irelephant.net/,"instagram.com,instagr.am",Kittygram Irelephant instance
+instagram,kittygram,domain_replace,https://kittygram.nexussfan.cz/,"instagram.com,instagr.am",Kittygram Nexussfan instance
+instagram,kittygram,domain_replace,https://kittygram.kareem.one/,"instagram.com,instagr.am",Kittygram Kareem instance
+instagram,kittygram,domain_replace,https://kg.lus.lu/,"instagram.com,instagr.am",Kittygram Lus instance
+instagram,kittygram,domain_replace,https://kg.meowing.de/,"instagram.com,instagr.am",Kittygram Meowing instance
+instagram,kittygram,domain_replace,https://kittygram.nadeko.net/,"instagram.com,instagr.am",Kittygram Nadeko instance
 reddit,redlib,domain_replace,https://red.artemislena.eu/,"reddit.com,old.reddit.com,redd.it",Redlib instance Artemislena
 reddit,redlib,domain_replace,https://redlib.catsarch.com/,"reddit.com,old.reddit.com,redd.it",Redlib instance Catsarch
 reddit,redlib,domain_replace,https://redlib.privacyredirect.com/,"reddit.com,old.reddit.com,redd.it",Redlib instance PrivacyRedirect
@@ -26,6 +39,8 @@ reddit,redlib,domain_replace,https://redlib-1.privadency.com/,"reddit.com,old.re
 reddit,redlib,domain_replace,https://safereddit.com/,"reddit.com,old.reddit.com,redd.it",SafeReddit Redlib instance
 reddit,eddrit,domain_replace,https://eddrit.com/,"reddit.com,old.reddit.com,redd.it",Eddrit alternative Reddit frontend
 reddit,redlib,domain_replace,https://redlib.nadeko.net/,"reddit.com,old.reddit.com,redd.it",Redlib instance Nadeko
+reddit,redlib,domain_replace,https://reddit.idevicehacked.com/,"reddit.com,old.reddit.com,redd.it",Redlib instance iDeviceHacked
+reddit,redlib,domain_replace,https://redlib.freedit.eu/,"reddit.com,old.reddit.com,redd.it",Redlib instance Freedit
 medium,scribe,domain_replace,https://m.opnxng.com/,"medium.com",Scribe instance Opnxng
 medium,scribe,domain_replace,https://scribe.pussthecat.org/,"medium.com",Scribe instance Pussthecat
 medium,scribe,domain_replace,https://scribe.privacyredirect.com/,"medium.com",Scribe instance PrivacyRedirect
@@ -41,6 +56,21 @@ imgur,rimgo,domain_replace,https://rimgo.canine.tools/,"imgur.com,i.imgur.com",R
 imgur,rimgo,domain_replace,https://rimgo.catsarch.com/,"imgur.com,i.imgur.com",Rimgo Catsarch instance
 imgur,rimgo,domain_replace,https://rimgo.reallyaweso.me/,"imgur.com,i.imgur.com",Rimgo ReallyAwesome instance
 imgur,rimgo,domain_replace,https://rimgo.privacyredirect.com/,"imgur.com,i.imgur.com",Rimgo PrivacyRedirect instance
+imgur,rimgo,domain_replace,https://ri.bcow.xyz/,"imgur.com,i.imgur.com",Rimgo Bcow instance
+imgur,rimgo,domain_replace,https://ri.nadeko.net/,"imgur.com,i.imgur.com",Rimgo Nadeko instance
+imgur,rimgo,domain_replace,https://rimgo.nohost.network/,"imgur.com,i.imgur.com",Rimgo Nohost instance
+imgur,rimgo,domain_replace,https://rimgo.ducks.party/,"imgur.com,i.imgur.com",Rimgo Ducks Party instance
+imgur,rmgur,domain_replace,https://rmgur.com/,"imgur.com,i.imgur.com",Rmgur Imgur viewer
+imgur,rimgo,domain_replace,https://rimgo.aketawi.space/,"imgur.com,i.imgur.com",Rimgo Aketawi instance
 goodreads,biblioreads,domain_replace,https://biblioreads.privacyredirect.com/,"goodreads.com",Biblioreads Goodreads frontend
+goodreads,biblioreads,domain_replace,https://biblioreads.eu.org/,"goodreads.com",Biblioreads EU instance
+goodreads,biblioreads,domain_replace,https://biblioreads.vercel.app/,"goodreads.com",Biblioreads Vercel instance
+goodreads,biblioreads,domain_replace,https://biblioreads.mooo.com/,"goodreads.com",Biblioreads Mooo instance
+goodreads,biblioreads,domain_replace,https://biblioreads.lunar.icu/,"goodreads.com",Biblioreads Lunar instance
+goodreads,biblioreads,domain_replace,https://read.freedit.eu/,"goodreads.com",Biblioreads Freedit instance
+goodreads,biblioreads,domain_replace,https://biblioreads.ducks.party/,"goodreads.com",Biblioreads Ducks Party instance
+goodreads,biblioreads,domain_replace,https://br.bloat.cat/,"goodreads.com",Biblioreads Bloatcat instance
+goodreads,biblioreads,domain_replace,https://biblioreads.canine.tools/,"goodreads.com",Biblioreads Canine Tools instance
+goodreads,biblioreads,domain_replace,https://biblioreads.birdcat.cafe/,"goodreads.com",Biblioreads Birdcat Cafe instance
 ens,limo,append_ext,https://eth.limo/,"*.eth",Ethereum Name Service Limo gateway
 i2p,i2p.surf,prepend,https://i2p.surf/proxy/,"*.i2p",I2P Surf HTTP gateway proxy
