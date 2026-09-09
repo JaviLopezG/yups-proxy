@@ -6,9 +6,11 @@ mainstream platforms (such as Twitter/X, Reddit, YouTube, Instagram, Medium,
 Imgur, Goodreads, ENS, and I2P), with general archive fallbacks.
 
 The goal of YUPS is to make the accessible web resilient, private, and
-censorship-resistant. It serves as a unified entry point: append
+censorship-resistant. It serves as a unified entry point: prepend
 `https://yups.io/?url=` to any target URL to instantly load it through a privacy
 proxy.
+
+![Logo](./img/icons/logo-128.png)
 
 ## Key Features
 
@@ -145,12 +147,83 @@ service,tech,type,proxy_url,patterns,description
 We invite everyone to self-host their own instances, replicate the dataset, and
 contribute improvements.
 
-## Repositories & Contact
+## Contact
 
-- GitHub:
-  [https://github.com/javilopezg/yups-proxy](https://github.com/javilopezg/yups-proxy)
-- Maintainer: Javi López ([mail@javilopezg.com](mailto:mail@javilopezg.com))
+- Maintainer: ([mail@javilopezg.com](mailto:mail@javilopezg.com))
 
 ## License
 
 BSD 3-Clause License. See [LICENSE](LICENSE) for details.
+
+## FAQ
+
+### Why the little dog?
+
+It's a capybara, an angry capybara. She is angry about the current Internet. She
+doesn't like bans, blocks or prohibitions at all.
+
+Also, capybaras fight their enemies smashing them with their ass, and this
+capybara has a lot of enemies to smash like corporations or the ICANN.
+
+### Why is the site brown?
+
+Capybaras are brown so the site is brown. It also represents the enshitification
+of Internet.
+
+You can clone it and publish an alternative site. I'll help you whit that. The
+more clones, more resilient will be Internet.
+
+### Sometimes the page is not loading
+
+Yes, sometimes the proxies are down. I should check what proxies are alive to
+exclude them but this is a functionality to future versions.
+
+### With the same url my friend and me has different results
+
+Yes, it will use a random valid proxy to redirect any request so two requests
+that are exactly the same can get different redirections.
+
+### What services are managed?
+
+Currently, we have detected proxies for Twitter (X), Youtube, Instagram, Reddit,
+Medium, Imgur, and Goodreas. Other urls are managed as "general" (news media,
+probably) and redirected to archive proxies.
+
+You can see (and improve) the whole list in the
+[proxies.csv](./data/proxies.csv).
+
+### What platforms are not managed yet?
+
+There are a lot of services that require an user, a subscription, or specialized
+software/configuration to access the information like Facebook, TikTok,
+Linkedin, Pinterest, Quora, Tor, Lokinet, GNS, IPNS... We have to do something
+with them. [Ideas?](mailto:mail@javilopezg.com).
+
+### Can I contribute to yups?
+
+Sure. More hands are always usefull :)
+
+### Can I clone/deploy it?
+
+Of course, more yups-like sites would improve Internet.
+
+### I want my own proxy to access an specific server
+
+There are some softwares that we know are working like
+[Nitter](https://github.com/zedeus/nitter),
+[Kittygram](https://codeberg.org/irelephant/kittygram). You can check the
+[proxies.csv](./data/proxies.csv) file or write me a line.
+
+### I want to give you money
+
+I really apreciate it, but no, thanks. I can't legally or morally accept it. The
+people doing the real work are the ones building and maintaining the proxies and
+some of them are accepting donations.
+
+### I want to help but I don't want to collaborate, I'm a free solo
+
+I know that feeling. Big things need a lot of people, but small changes can make
+huge improvements. There are
+[a lot of things](https://code.javilopezg.com/javilopezg/quijote/src/branch/main/REQUIREMENTS.md#14-nice-to-have)
+that you can do to improve Internet. Let me know If I can help you to choose a
+line of work.
