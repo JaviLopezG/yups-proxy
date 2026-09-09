@@ -159,71 +159,72 @@ BSD 3-Clause License. See [LICENSE](LICENSE) for details.
 
 ### Why the little dog?
 
-It's a capybara, an angry capybara. She is angry about the current Internet. She
-doesn't like bans, blocks or prohibitions at all.
+It's a capybara—an angry capybara. She is angry about the current state of the
+Internet. She doesn't like bans, blocks, or restrictions at all.
 
-Also, capybaras fight their enemies smashing them with their ass, and this
-capybara has a lot of enemies to smash like corporations or the ICANN.
+Also, capybaras fight their enemies by smashing them with their butt, and this
+capybara has plenty of enemies to smash, like big corporations and ICANN.
 
 ### Why is the site brown?
 
-Capybaras are brown so the site is brown. It also represents the enshitification
-of Internet.
+Capybaras are brown, so the site is brown. It also represents the
+enshittification of the Internet.
 
-You can clone it and publish an alternative site. I'll help you whit that. The
-more clones, more resilient will be Internet.
+You can clone it and host an alternative instance. I'll gladly help you with
+that. The more clones out there, the more resilient the Internet becomes.
 
-### Sometimes the page is not loading
+### Sometimes a page doesn't load
 
-Yes, sometimes the proxies are down. I should check what proxies are alive to
-exclude them but this is a functionality to future versions.
+Yes, public proxies go down from time to time. We plan to add automatic health
+checks to filter out dead proxies in future versions.
 
-### With the same url my friend and me has different results
+### Why do my friend and I get different results for the same URL?
 
-Yes, it will use a random valid proxy to redirect any request so two requests
-that are exactly the same can get different redirections.
+YUPS picks a random valid proxy for each request, so two identical requests can
+be routed to different mirrors.
 
-### What services are managed?
+### What services are supported?
 
-Currently, we have detected proxies for Twitter (X), Youtube, Instagram, Reddit,
-Medium, Imgur, and Goodreas. Other urls are managed as "general" (news media,
-probably) and redirected to archive proxies.
+Currently, we support proxies for Twitter (X), YouTube, Instagram, Reddit,
+Medium, Imgur, and Goodreads. Other URLs are treated as "general" (news media,
+blogs, etc.) and routed to web archive proxies.
 
-You can see (and improve) the whole list in the
+You can see (and help improve) the full list in
 [proxies.csv](./data/proxies.csv).
 
-### What platforms are not managed yet?
+### What platforms are not supported yet?
 
-There are a lot of services that require an user, a subscription, or specialized
-software/configuration to access the information like Facebook, TikTok,
-Linkedin, Pinterest, Quora, Tor, Lokinet, GNS, IPNS... We have to do something
-with them. [Ideas?](mailto:mail@javilopezg.com).
+Many services require a user account, a paid subscription, or specialized
+software/configuration to view content—such as Facebook, TikTok, LinkedIn,
+Pinterest, Quora, Tor, Lokinet, GNS, and IPNS. We want to find workarounds for
+them. Have [ideas?](mailto:mail@javilopezg.com).
 
-### Can I contribute to yups?
+### Can I contribute to YUPS?
 
-Sure. More hands are always usefull :)
+Sure! Extra hands are always useful.
 
-### Can I clone/deploy it?
+### Can I clone or self-host it?
 
-Of course, more yups-like sites would improve Internet.
+Of course! The more YUPS-like sites out there, the better and more resilient the
+Internet will be.
 
-### I want my own proxy to access an specific server
+### I want my own proxy to access a specific service
 
-There are some softwares that we know are working like
-[Nitter](https://github.com/zedeus/nitter),
-[Kittygram](https://codeberg.org/irelephant/kittygram). You can check the
-[proxies.csv](./data/proxies.csv) file or write me a line.
+There are several open-source frontends actively maintained, such as
+[Nitter](https://github.com/zedeus/nitter) or
+[Kittygram](https://codeberg.org/irelephant/kittygram). Check the
+[proxies.csv](./data/proxies.csv) file for more examples, or drop me a line.
 
 ### I want to give you money
 
-I really apreciate it, but no, thanks. I can't legally or morally accept it. The
-people doing the real work are the ones building and maintaining the proxies and
-some of them are accepting donations.
+I really appreciate it, but no, thanks! I can't legally or morally accept it.
+The people doing the heavy lifting are the ones building and hosting the
+proxies, and many of them accept donations directly.
 
-### I want to help but I don't want to collaborate, I'm a free solo
+### I want to help, but I prefer working solo
 
-I know that feeling. Big things need a lot of people, but small changes can make
-huge improvements. There are
+I know that feeling. Big projects need communities, but independent work can
+make huge improvements too. There are
 [a lot of things](https://code.javilopezg.com/javilopezg/quijote/src/branch/main/REQUIREMENTS.md#14-nice-to-have)
-that you can do to improve Internet. Let me know If I can help you to choose a
-line of work.
+you can do to improve the decentralized web. Let me know if you'd like
+suggestions on areas to explore.
