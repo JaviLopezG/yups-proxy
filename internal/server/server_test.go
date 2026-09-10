@@ -168,8 +168,8 @@ func TestHelpPage(t *testing.T) {
 	if !strings.Contains(body, "How to Use YUPS") {
 		t.Errorf("expected help page to contain 'How to Use YUPS'")
 	}
-	if !strings.Contains(body, "https://yups.io?url=") {
-		t.Errorf("expected help page to contain 'https://yups.io?url='")
+	if !strings.Contains(body, "https://yups.io/?url=") {
+		t.Errorf("expected help page to contain 'https://yups.io/?url='")
 	}
 	if !strings.Contains(body, "Home") {
 		t.Errorf("expected help page to contain Home link")
@@ -233,6 +233,16 @@ func TestErrorRecoveryPath(t *testing.T) {
 			name:         "full http path",
 			path:         "/http://reddit.com/r/golang",
 			wantLocation: "/?url=http%3A%2F%2Freddit.com%2Fr%2Fgolang",
+		},
+		{
+			name:         "bare domain path",
+			path:         "/x.com/Wikipedia",
+			wantLocation: "/?url=https%3A%2F%2Fx.com%2FWikipedia",
+		},
+		{
+			name:         "bare domain path with subpath",
+			path:         "/reddit.com/r/golang",
+			wantLocation: "/?url=https%3A%2F%2Freddit.com%2Fr%2Fgolang",
 		},
 	}
 
@@ -395,7 +405,7 @@ func TestHomePagePrefixAndCopy(t *testing.T) {
 	if !strings.Contains(body, "id=\"copyBtn\"") {
 		t.Errorf("expected body to contain id='copyBtn'")
 	}
-	if !strings.Contains(body, "https://yups.io?url=") {
-		t.Errorf("expected body to contain default prefix 'https://yups.io?url='")
+	if !strings.Contains(body, "https://yups.io/?url=") {
+		t.Errorf("expected body to contain default prefix 'https://yups.io/?url='")
 	}
 }
