@@ -20,6 +20,7 @@ type Entry struct {
 	ProxyURL    string
 	Patterns    []string
 	Description string
+	Active      bool
 }
 
 // Registry manages proxy definitions and transformation rules.
@@ -44,7 +45,16 @@ func (r *Registry) LoadFromReader(reader io.Reader) error {
 		return fmt.Errorf("empty proxies csv")
 	}
 
-	// First row is header: service,tech,type,proxy_url,patterns,description
+	// First row is header: service,tech,type,proxy_url,patterns,description,active
+	header := records[0]
+	activeColIdx := -1
+	for colIdx, colName := range header {
+		if strings.EqualFold(strings.TrimSpace(colName), "active") {
+			activeColIdx = colIdx
+			break
+		}
+	}
+
 	entries := make([]Entry, 0, len(records)-1)
 	for idx, row := range records[1:] {
 		if len(row) < 5 {
@@ -58,6 +68,13 @@ func (r *Registry) LoadFromReader(reader io.Reader) error {
 		description := ""
 		if len(row) > 5 {
 			description = strings.TrimSpace(row[5])
+		}
+
+		active := true
+		if activeColIdx != -1 && len(row) > activeColIdx {
+			active = parseBool(row[activeColIdx], true)
+		} else if len(row) > 6 {
+			active = parseBool(row[6], true)
 		}
 
 		patternParts := strings.Split(rawPatterns, ",")
@@ -76,11 +93,26 @@ func (r *Registry) LoadFromReader(reader io.Reader) error {
 			ProxyURL:    proxyURL,
 			Patterns:    patterns,
 			Description: description,
+			Active:      active,
 		})
 	}
 
 	r.entries = entries
 	return nil
+}
+
+func parseBool(val string, defaultVal bool) bool {
+	v := strings.ToLower(strings.TrimSpace(val))
+	switch v {
+	case "true", "1", "yes", "y", "t", "active":
+		return true
+	case "false", "0", "no", "n", "f", "inactive":
+		return false
+	case "":
+		return defaultVal
+	default:
+		return defaultVal
+	}
 }
 
 // LoadDefault loads the embedded default proxy dataset.
@@ -91,6 +123,17 @@ func (r *Registry) LoadDefault() error {
 // Entries returns all loaded entries.
 func (r *Registry) Entries() []Entry {
 	return r.entries
+}
+
+// ActiveEntries returns all loaded entries that are marked active.
+func (r *Registry) ActiveEntries() []Entry {
+	var active []Entry
+	for _, e := range r.entries {
+		if e.Active {
+			active = append(active, e)
+		}
+	}
+	return active
 }
 
 // NormalizeURL cleans and ensures a valid absolute URL scheme.
@@ -138,7 +181,7 @@ func (r *Registry) MatchService(targetURL string) (string, []Entry) {
 	// 1. Try matching service-specific patterns first
 	var matchedService string
 	for _, entry := range r.entries {
-		if entry.Service == "general" {
+		if !entry.Active || entry.Service == "general" {
 			continue
 		}
 		for _, pattern := range entry.Patterns {
@@ -166,6 +209,9 @@ func (r *Registry) MatchService(targetURL string) (string, []Entry) {
 func (r *Registry) filterService(service string) []Entry {
 	var results []Entry
 	for _, entry := range r.entries {
+		if !entry.Active {
+			continue
+		}
 		if strings.EqualFold(entry.Service, service) {
 			results = append(results, entry)
 		}

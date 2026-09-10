@@ -79,13 +79,17 @@ make run
 # Run test suite with readable, colored output
 make test
 
+# Verify proxy availability and update proxies.csv
+make check-proxies
+
 # Build Docker image
 make docker-build
 ```
 
-## Direct Go Commands
+## Direct Go and Script Commands
 
-If you prefer invoking Go directly without Make, the underlying commands are:
+If you prefer invoking Go and Python directly without Make, the underlying
+commands are:
 
 ```bash
 # Compile binary
@@ -99,6 +103,9 @@ go test -v ./...
 
 # Run battery test suite
 go test -v ./test/...
+
+# Verify proxy availability and update proxies.csv
+python3 ./scripts/check-proxies.py
 ```
 
 ## Configuration
@@ -125,7 +132,7 @@ and opening a pull request.
 The CSV structure:
 
 ```csv
-service,tech,type,proxy_url,patterns,description
+service,tech,type,proxy_url,patterns,description,active
 ```
 
 - `service`: Identifier for the platform (e.g., `twitter`, `reddit`, `youtube`,
@@ -143,6 +150,9 @@ service,tech,type,proxy_url,patterns,description
 - `patterns`: Comma-separated domain patterns/wildcards to match (e.g.,
   `x.com,twitter.com,xcancel.com`).
 - `description`: Short description of the instance.
+- `active`: Boolean flag (`true` or `false`) indicating whether the proxy is
+  currently online and verified. Inactive proxies are ignored by the routing
+  service.
 
 We invite everyone to self-host their own instances, replicate the dataset, and
 contribute improvements.
@@ -175,8 +185,16 @@ that. The more clones out there, the more resilient the Internet becomes.
 
 ### Sometimes a page doesn't load
 
-Yes, public proxies go down from time to time. We plan to add automatic health
-checks to filter out dead proxies in future versions.
+Public proxies go down periodically or introduce aggressive bot protections.
+YUPS allows you to probe all proxies and automatically update their status in
+`proxies.csv` before starting the service:
+
+```bash
+make check-proxies
+```
+
+Any proxy returning HTTP 4xx, 5xx, or network timeouts will be marked
+`active=false`, and YUPS will automatically skip it during routing.
 
 ### Why do my friend and I get different results for the same URL?
 
