@@ -1,4 +1,4 @@
-.PHONY: all build run test test-raw docker-build docker-run clean help
+.PHONY: all build run test test-raw check-proxies docker-build docker-run clean help
 
 all: build test
 
@@ -8,6 +8,7 @@ help:
 	@echo "  run           Run yups locally using go run"
 	@echo "  test          Run tests with formatted, readable output"
 	@echo "  test-raw      Run standard go test -v ./..."
+	@echo "  check-proxies Verify proxy availability and update proxies.csv"
 	@echo "  docker-build  Build the Docker container image"
 	@echo "  docker-run    Run the Docker container on port 8080"
 	@echo "  clean         Remove compiled binaries"
@@ -23,6 +24,9 @@ test:
 
 test-raw:
 	go test -v ./...
+
+check-proxies:
+	./scripts/check-proxies.py
 
 docker-build:
 	docker build -t yups:latest .
