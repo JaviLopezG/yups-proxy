@@ -228,10 +228,11 @@ func (s *Server) handleRoot(w http.ResponseWriter, r *http.Request) {
 	if rec, ok := w.(*responseRecorder); ok {
 		rec.action = "HOME"
 	}
-	prefix := s.config.BaseURL + "?url="
-	if s.config.BaseURL == "" {
-		prefix = "https://yups.io?url="
+	base := strings.TrimRight(s.config.BaseURL, "/")
+	if base == "" {
+		base = "https://yups.io"
 	}
+	prefix := base + "/?url="
 	if err := s.renderer.RenderIndex(w, ui.IndexViewData{PrefixURL: prefix}); err != nil {
 		http.Error(w, "Failed to render home page", http.StatusInternalServerError)
 	}
@@ -358,9 +359,19 @@ func (s *Server) tryPathRecovery(w http.ResponseWriter, r *http.Request) bool {
 	if raw == "" {
 		raw = strings.TrimPrefix(r.URL.Path, "/")
 	}
+	if raw == "" {
+		return false
+	}
 
 	lowerRaw := strings.ToLower(raw)
-	if !strings.HasPrefix(lowerRaw, "http") {
+
+	// Exclude known endpoints and static routes
+	firstSegment := lowerRaw
+	if idx := strings.Index(firstSegment, "/"); idx != -1 {
+		firstSegment = firstSegment[:idx]
+	}
+	switch firstSegment {
+	case "help", "healthz", "links", "static", "favicon.ico", "robots.txt":
 		return false
 	}
 
@@ -379,10 +390,16 @@ func (s *Server) tryPathRecovery(w http.ResponseWriter, r *http.Request) bool {
 		return false
 	}
 
+	// If the target doesn't have an explicit scheme, prepend https:// for the canonical URL
+	target := raw
+	if !strings.HasPrefix(target, "http://") && !strings.HasPrefix(target, "https://") {
+		target = "https://" + target
+	}
+
 	if rec, ok := w.(*responseRecorder); ok {
 		rec.action = "RECOVERY_PATH"
 	}
-	http.Redirect(w, r, "/?url="+url.QueryEscape(raw), http.StatusTemporaryRedirect)
+	http.Redirect(w, r, "/?url="+url.QueryEscape(target), http.StatusTemporaryRedirect)
 	return true
 }
 
