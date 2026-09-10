@@ -49,7 +49,7 @@ func main() {
 			log.Fatalf("Failed to load default embedded proxies: %v", err)
 		}
 	}
-	log.Printf("Loaded %d proxy configurations.", len(reg.Entries()))
+	log.Printf("Loaded %d proxy configurations (%d active).", len(reg.Entries()), len(reg.ActiveEntries()))
 
 	// Initialize metadata cache with SSRF-safe HTTP client
 	safeClient := metadata.NewSafeHTTPClient(3 * time.Second)

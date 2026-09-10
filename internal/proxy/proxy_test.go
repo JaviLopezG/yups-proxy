@@ -38,9 +38,9 @@ func TestNormalizeURL(t *testing.T) {
 			expected: "https://instagram.com/p/123",
 		},
 		{
-			name:     "empty url errors",
-			input:    "   ",
-			wantErr:  true,
+			name:    "empty url errors",
+			input:   "   ",
+			wantErr: true,
 		},
 	}
 
@@ -204,5 +204,73 @@ func TestPickRandom(t *testing.T) {
 	}
 	if !valid {
 		t.Errorf("picked item %v not in candidates list", picked)
+	}
+}
+
+func TestLoadFromReaderWithActive(t *testing.T) {
+	csvData := `service,tech,type,proxy_url,patterns,description,active
+general,archive.is,query_param,https://archive.is/submit/?url=,*,Archive.is,true
+twitter,nitter1,domain_replace,https://nitter1.example.com/,x.com,Nitter Active,true
+twitter,nitter2,domain_replace,https://nitter2.example.com/,x.com,Nitter Inactive,false
+reddit,redlib1,domain_replace,https://redlib1.example.com/,reddit.com,Redlib 1,1
+reddit,redlib2,domain_replace,https://redlib2.example.com/,reddit.com,Redlib 0,0
+`
+	reg := NewRegistry()
+	if err := reg.LoadFromReader(strings.NewReader(csvData)); err != nil {
+		t.Fatalf("unexpected error loading csv: %v", err)
+	}
+
+	if len(reg.Entries()) != 5 {
+		t.Fatalf("expected 5 total entries, got %d", len(reg.Entries()))
+	}
+	if len(reg.ActiveEntries()) != 3 {
+		t.Fatalf("expected 3 active entries, got %d", len(reg.ActiveEntries()))
+	}
+
+	// Backward compatibility: CSV without active column should default to true
+	legacyCSV := `service,tech,type,proxy_url,patterns,description
+general,archive.is,query_param,https://archive.is/submit/?url=,*,Archive.is
+twitter,nitter,domain_replace,https://nitter.example.com/,x.com,Nitter
+`
+	legacyReg := NewRegistry()
+	if err := legacyReg.LoadFromReader(strings.NewReader(legacyCSV)); err != nil {
+		t.Fatalf("unexpected error loading legacy csv: %v", err)
+	}
+	if len(legacyReg.ActiveEntries()) != 2 {
+		t.Fatalf("expected all legacy entries to be active by default, got %d", len(legacyReg.ActiveEntries()))
+	}
+}
+
+func TestActiveFiltering(t *testing.T) {
+	csvData := `service,tech,type,proxy_url,patterns,description,active
+general,archive.is,query_param,https://archive.is/submit/?url=,*,Archive.is,true
+twitter,nitter_active,domain_replace,https://active.nitter.example.com/,x.com,Nitter Active,true
+twitter,nitter_dead,domain_replace,https://dead.nitter.example.com/,x.com,Nitter Dead,false
+reddit,redlib_dead,domain_replace,https://dead.redlib.example.com/,reddit.com,Redlib Dead,false
+`
+	reg := NewRegistry()
+	if err := reg.LoadFromReader(strings.NewReader(csvData)); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// Twitter has one active and one inactive mirror
+	svc, candidates := reg.MatchService("https://x.com/jack/status/1")
+	if svc != "twitter" {
+		t.Errorf("expected matched service 'twitter', got %q", svc)
+	}
+	if len(candidates) != 1 {
+		t.Fatalf("expected exactly 1 active candidate for twitter, got %d", len(candidates))
+	}
+	if candidates[0].Tech != "nitter_active" {
+		t.Errorf("expected candidate 'nitter_active', got %q", candidates[0].Tech)
+	}
+
+	// Reddit has only inactive mirrors -> should fallback to general
+	svc, candidates = reg.MatchService("https://reddit.com/r/golang")
+	if svc != "general" {
+		t.Errorf("expected fallback service 'general' when all reddit proxies are inactive, got %q", svc)
+	}
+	if len(candidates) != 1 || candidates[0].Service != "general" {
+		t.Fatalf("expected general proxy candidate fallback, got %v", candidates)
 	}
 }
