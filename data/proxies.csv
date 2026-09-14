@@ -8,14 +8,14 @@ twitter,nitter,domain_replace,https://nitter.meowing.monster/,"x.com,twitter.com
 twitter,nitter,domain_replace,https://nitter.xitter.cc/,"x.com,twitter.com,xcancel.com,nitter.net,fixupx.com,vxtwitter.com",Nitter Xitter instance,true,true
 twitter,nitter,domain_replace,https://lightbrd.com/,"x.com,twitter.com,xcancel.com,nitter.net,fixupx.com,vxtwitter.com",Lightbrd Twitter frontend,true,true
 twitter,nitter,domain_replace,https://nitter.click/,"x.com,twitter.com,xcancel.com,nitter.net,fixupx.com,vxtwitter.com",Nitter click instance,true,true
-twitter,nitter,domain_replace,https://x.n0g.xyz/,"x.com,twitter.com,xcancel.com,nitter.net,fixupx.com,vxtwitter.com",Nitter n0g instance,true,true
-twitter,kitter,domain_replace,https://tw.eir-nya.gay/,"x.com,twitter.com,xcancel.com,nitter.net,fixupx.com,vxtwitter.com",Kitter Twitter frontend,true,true
+twitter,nitter,domain_replace,https://x.n0g.xyz/,"x.com,twitter.com,xcancel.com,nitter.net,fixupx.com,vxtwitter.com",Nitter n0g instance,false,true
+twitter,kitter,domain_replace,https://tw.eir-nya.gay/,"x.com,twitter.com,xcancel.com,nitter.net,fixupx.com,vxtwitter.com",Kitter Twitter frontend,false,true
 twitter,nitter,domain_replace,https://nitter.net/,"x.com,twitter.com,xcancel.com,nitter.net,fixupx.com,vxtwitter.com",Official Nitter instance,false,false
-twitter,xcancel,domain_replace,https://xcancel.com/,"x.com,twitter.com,nitter.net,fixupx.com,vxtwitter.com",XCancel Twitter frontend,true,true
+twitter,xcancel,domain_replace,https://xcancel.com/,"x.com,twitter.com,nitter.net,fixupx.com,vxtwitter.com",XCancel Twitter frontend,false,true
 twitter,nitter,domain_replace,https://nitter.jaydenha.uk/,"x.com,twitter.com,xcancel.com,nitter.net,fixupx.com,vxtwitter.com",Nitter instance Jaydenha,true,true
 twitter,nitter,domain_replace,https://nitter.tiekoetter.com/,"x.com,twitter.com,xcancel.com,nitter.net,fixupx.com,vxtwitter.com",Nitter instance Tiekoetter,true,true
 twitter,nitter,domain_replace,https://nitter.catsarch.com/,"x.com,twitter.com,xcancel.com,nitter.net,fixupx.com,vxtwitter.com",Nitter instance Catsarch,false,true
-youtube,invidious,domain_replace,https://invidious.nerdvpn.de/,"youtube.com,youtu.be,m.youtube.com",Invidious instance by NerdVPN,false,true
+youtube,invidious,domain_replace,https://invidious.nerdvpn.de/,"youtube.com,youtu.be,m.youtube.com",Invidious instance by NerdVPN,true,true
 youtube,invidious,domain_replace,https://invidious.tiekoetter.com/,"youtube.com,youtu.be,m.youtube.com",Invidious instance Tiekoetter,true,true
 youtube,invidious,domain_replace,https://inv.nadeko.net/,"youtube.com,youtu.be,m.youtube.com",Invidious instance Nadeko,true,true
 youtube,invidious,domain_replace,https://yt.chocolatemoo53.com/,"youtube.com,youtu.be,m.youtube.com",Invidious instance Chocolatemoo53,true,true
@@ -28,10 +28,10 @@ instagram,kittygram,domain_replace,https://kittygram.privacyredirect.com/,"insta
 instagram,kittygram,domain_replace,https://kittygr.am/,"instagram.com,instagr.am",Kittygram main instance,true,true
 instagram,kittygram,domain_replace,https://kittygram.irelephant.net/,"instagram.com,instagr.am",Kittygram Irelephant instance,true,true
 instagram,kittygram,domain_replace,https://kittygram.nexussfan.cz/,"instagram.com,instagr.am",Kittygram Nexussfan instance,true,false
-instagram,kittygram,domain_replace,https://kittygram.kareem.one/,"instagram.com,instagr.am",Kittygram Kareem instance,true,true
+instagram,kittygram,domain_replace,https://kittygram.kareem.one/,"instagram.com,instagr.am",Kittygram Kareem instance,false,true
 instagram,kittygram,domain_replace,https://kg.lus.lu/,"instagram.com,instagr.am",Kittygram Lus instance,true,true
 instagram,kittygram,domain_replace,https://kg.meowing.de/,"instagram.com,instagr.am",Kittygram Meowing instance,true,true
-instagram,kittygram,domain_replace,https://kittygram.nadeko.net/,"instagram.com,instagr.am",Kittygram Nadeko instance,true,true
+instagram,kittygram,domain_replace,https://kittygram.nadeko.net/,"instagram.com,instagr.am",Kittygram Nadeko instance,false,true
 reddit,redlib,domain_replace,https://red.artemislena.eu/,"reddit.com,old.reddit.com,redd.it",Redlib instance Artemislena,true,true
 reddit,redlib,domain_replace,https://redlib.catsarch.com/,"reddit.com,old.reddit.com,redd.it",Redlib instance Catsarch,true,false
 reddit,redlib,domain_replace,https://redlib.privacyredirect.com/,"reddit.com,old.reddit.com,redd.it",Redlib instance PrivacyRedirect,true,true
@@ -46,7 +46,7 @@ medium,scribe,domain_replace,https://scribe.pussthecat.org/,medium.com,Scribe in
 medium,scribe,domain_replace,https://scribe.privacyredirect.com/,medium.com,Scribe instance PrivacyRedirect,true,true
 medium,scribe,domain_replace,https://scribe.nixnet.services/,medium.com,Scribe instance Nixnet,true,true
 medium,scribe,domain_replace,https://scribe.rawbit.ninja/,medium.com,Scribe instance Rawbit,true,true
-medium,scribe,domain_replace,https://scribe.r4fo.com/,medium.com,Scribe instance R4fo,true,true
+medium,scribe,domain_replace,https://scribe.r4fo.com/,medium.com,Scribe instance R4fo,true,false
 imgur,rimgo,domain_replace,https://anaimg.starbeamrainbowlabs.com/,"imgur.com,i.imgur.com",Rimgo Starbeam instance,true,true
 imgur,rimgo,domain_replace,https://imgur.artemislena.eu/,"imgur.com,i.imgur.com",Rimgo Artemislena instance,true,true
 imgur,rimgo,domain_replace,https://imgur.nerdvpn.de/,"imgur.com,i.imgur.com",Rimgo NerdVPN instance,true,true
@@ -59,7 +59,7 @@ imgur,rimgo,domain_replace,https://rimgo.privacyredirect.com/,"imgur.com,i.imgur
 imgur,rimgo,domain_replace,https://ri.bcow.xyz/,"imgur.com,i.imgur.com",Rimgo Bcow instance,true,false
 imgur,rimgo,domain_replace,https://ri.nadeko.net/,"imgur.com,i.imgur.com",Rimgo Nadeko instance,true,true
 imgur,rimgo,domain_replace,https://rimgo.nohost.network/,"imgur.com,i.imgur.com",Rimgo Nohost instance,false,true
-imgur,rimgo,domain_replace,https://rimgo.ducks.party/,"imgur.com,i.imgur.com",Rimgo Ducks Party instance,true,true
+imgur,rimgo,domain_replace,https://rimgo.ducks.party/,"imgur.com,i.imgur.com",Rimgo Ducks Party instance,false,true
 imgur,rmgur,domain_replace,https://rmgur.com/,"imgur.com,i.imgur.com",Rmgur Imgur viewer,true,true
 imgur,rimgo,domain_replace,https://rimgo.aketawi.space/,"imgur.com,i.imgur.com",Rimgo Aketawi instance,true,true
 goodreads,biblioreads,domain_replace,https://biblioreads.privacyredirect.com/,goodreads.com,Biblioreads Goodreads frontend,true,true
