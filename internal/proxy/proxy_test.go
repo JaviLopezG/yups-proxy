@@ -274,3 +274,30 @@ reddit,redlib_dead,domain_replace,https://dead.redlib.example.com/,reddit.com,Re
 		t.Fatalf("expected general proxy candidate fallback, got %v", candidates)
 	}
 }
+
+func TestLoadFromReaderWithAutoCheck(t *testing.T) {
+	csvData := `service,tech,type,proxy_url,patterns,description,active,auto-check
+general,archive.is,query_param,https://archive.is/submit/?url=,*,Archive.is,true,true
+twitter,nitter,domain_replace,https://nitter.net/,x.com,Official Nitter,false,false
+instagram,kittygram,domain_replace,https://kittygram.pussthecat.org/,instagram.com,Kittygram,true,false
+`
+	reg := NewRegistry()
+	if err := reg.LoadFromReader(strings.NewReader(csvData)); err != nil {
+		t.Fatalf("unexpected error loading csv: %v", err)
+	}
+
+	entries := reg.Entries()
+	if len(entries) != 3 {
+		t.Fatalf("expected 3 entries, got %d", len(entries))
+	}
+
+	if !entries[0].Active || !entries[0].AutoCheck {
+		t.Errorf("expected archive.is to be active and auto-check true, got active=%v, autocheck=%v", entries[0].Active, entries[0].AutoCheck)
+	}
+	if entries[1].Active || entries[1].AutoCheck {
+		t.Errorf("expected nitter.net to be active=false and auto-check=false, got active=%v, autocheck=%v", entries[1].Active, entries[1].AutoCheck)
+	}
+	if !entries[2].Active || entries[2].AutoCheck {
+		t.Errorf("expected pussthecat to be active=true and auto-check=false, got active=%v, autocheck=%v", entries[2].Active, entries[2].AutoCheck)
+	}
+}

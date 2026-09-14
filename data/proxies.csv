@@ -1,76 +1,76 @@
-service,tech,type,proxy_url,patterns,description,active
-general,archive.is,query_param,https://archive.is/submit/?url=,*,Archive.is web snapshot proxy,true
-general,archive.ph,query_param,https://archive.ph/submit/?url=,*,Archive.ph web snapshot proxy,true
-twitter,shitter,domain_replace,https://shitter.thepixora.com/,"x.com,twitter.com,xcancel.com,nitter.net,fixupx.com,vxtwitter.com",Shitter Twitter frontend,true
-twitter,nitter,domain_replace,https://nitter.kareem.one/,"x.com,twitter.com,xcancel.com,nitter.net,fixupx.com,vxtwitter.com",Nitter instance by Kareem,true
-twitter,dog nitter,domain_replace,https://nitter.miningtcup.me/,"x.com,twitter.com,xcancel.com,nitter.net,fixupx.com,vxtwitter.com",Dog Nitter instance,true
-twitter,nitter,domain_replace,https://nitter.meowing.monster/,"x.com,twitter.com,xcancel.com,nitter.net,fixupx.com,vxtwitter.com",Nitter instance Meowing Monster,true
-twitter,nitter,domain_replace,https://nitter.xitter.cc/,"x.com,twitter.com,xcancel.com,nitter.net,fixupx.com,vxtwitter.com",Nitter Xitter instance,true
-twitter,nitter,domain_replace,https://lightbrd.com/,"x.com,twitter.com,xcancel.com,nitter.net,fixupx.com,vxtwitter.com",Lightbrd Twitter frontend,true
-twitter,nitter,domain_replace,https://nitter.click/,"x.com,twitter.com,xcancel.com,nitter.net,fixupx.com,vxtwitter.com",Nitter click instance,true
-twitter,nitter,domain_replace,https://x.n0g.xyz/,"x.com,twitter.com,xcancel.com,nitter.net,fixupx.com,vxtwitter.com",Nitter n0g instance,true
-twitter,kitter,domain_replace,https://tw.eir-nya.gay/,"x.com,twitter.com,xcancel.com,nitter.net,fixupx.com,vxtwitter.com",Kitter Twitter frontend,true
-twitter,nitter,domain_replace,https://nitter.net/,"x.com,twitter.com,xcancel.com,nitter.net,fixupx.com,vxtwitter.com",Official Nitter instance,true
-twitter,xcancel,domain_replace,https://xcancel.com/,"x.com,twitter.com,nitter.net,fixupx.com,vxtwitter.com",XCancel Twitter frontend,true
-twitter,nitter,domain_replace,https://nitter.jaydenha.uk/,"x.com,twitter.com,xcancel.com,nitter.net,fixupx.com,vxtwitter.com",Nitter instance Jaydenha,true
-twitter,nitter,domain_replace,https://nitter.tiekoetter.com/,"x.com,twitter.com,xcancel.com,nitter.net,fixupx.com,vxtwitter.com",Nitter instance Tiekoetter,true
-twitter,nitter,domain_replace,https://nitter.catsarch.com/,"x.com,twitter.com,xcancel.com,nitter.net,fixupx.com,vxtwitter.com",Nitter instance Catsarch,true
-youtube,invidious,domain_replace,https://invidious.nerdvpn.de/,"youtube.com,youtu.be,m.youtube.com",Invidious instance by NerdVPN,true
-youtube,invidious,domain_replace,https://invidious.tiekoetter.com/,"youtube.com,youtu.be,m.youtube.com",Invidious instance Tiekoetter,true
-youtube,invidious,domain_replace,https://inv.nadeko.net/,"youtube.com,youtu.be,m.youtube.com",Invidious instance Nadeko,true
-youtube,invidious,domain_replace,https://yt.chocolatemoo53.com/,"youtube.com,youtu.be,m.youtube.com",Invidious instance Chocolatemoo53,true
-youtube,invidious,domain_replace,https://invidious.f5.si/,"youtube.com,youtu.be,m.youtube.com",Invidious instance F5,true
-youtube,invidious,domain_replace,https://yewtu.be/,"youtube.com,youtu.be,m.youtube.com",Yewtube Invidious instance,true
-youtube,invidious,domain_replace,https://invidious.flokinet.to/,"youtube.com,youtu.be,m.youtube.com",Invidious instance Flokinet,false
-instagram,kittygram,domain_replace,https://kittygram.pussthecat.org/,"instagram.com,instagr.am",Kittygram Pussthecat instance,false
-instagram,imginn,domain_replace,https://imginn.com/,"instagram.com,instagr.am",Imginn Instagram viewer,true
-instagram,kittygram,domain_replace,https://kittygram.privacyredirect.com/,"instagram.com,instagr.am",Kittygram PrivacyRedirect instance,true
-instagram,kittygram,domain_replace,https://kittygr.am/,"instagram.com,instagr.am",Kittygram main instance,true
-instagram,kittygram,domain_replace,https://kittygram.irelephant.net/,"instagram.com,instagr.am",Kittygram Irelephant instance,true
-instagram,kittygram,domain_replace,https://kittygram.nexussfan.cz/,"instagram.com,instagr.am",Kittygram Nexussfan instance,false
-instagram,kittygram,domain_replace,https://kittygram.kareem.one/,"instagram.com,instagr.am",Kittygram Kareem instance,true
-instagram,kittygram,domain_replace,https://kg.lus.lu/,"instagram.com,instagr.am",Kittygram Lus instance,true
-instagram,kittygram,domain_replace,https://kg.meowing.de/,"instagram.com,instagr.am",Kittygram Meowing instance,true
-instagram,kittygram,domain_replace,https://kittygram.nadeko.net/,"instagram.com,instagr.am",Kittygram Nadeko instance,true
-reddit,redlib,domain_replace,https://red.artemislena.eu/,"reddit.com,old.reddit.com,redd.it",Redlib instance Artemislena,true
-reddit,redlib,domain_replace,https://redlib.catsarch.com/,"reddit.com,old.reddit.com,redd.it",Redlib instance Catsarch,false
-reddit,redlib,domain_replace,https://redlib.privacyredirect.com/,"reddit.com,old.reddit.com,redd.it",Redlib instance PrivacyRedirect,true
-reddit,redlib,domain_replace,https://redlib-1.privadency.com/,"reddit.com,old.reddit.com,redd.it",Redlib instance Privadency,true
-reddit,redlib,domain_replace,https://safereddit.com/,"reddit.com,old.reddit.com,redd.it",SafeReddit Redlib instance,true
-reddit,eddrit,domain_replace,https://eddrit.com/,"reddit.com,old.reddit.com,redd.it",Eddrit alternative Reddit frontend,true
-reddit,redlib,domain_replace,https://redlib.nadeko.net/,"reddit.com,old.reddit.com,redd.it",Redlib instance Nadeko,true
-reddit,redlib,domain_replace,https://reddit.idevicehacked.com/,"reddit.com,old.reddit.com,redd.it",Redlib instance iDeviceHacked,true
-reddit,redlib,domain_replace,https://redlib.freedit.eu/,"reddit.com,old.reddit.com,redd.it",Redlib instance Freedit,true
-medium,scribe,domain_replace,https://m.opnxng.com/,medium.com,Scribe instance Opnxng,true
-medium,scribe,domain_replace,https://scribe.pussthecat.org/,medium.com,Scribe instance Pussthecat,false
-medium,scribe,domain_replace,https://scribe.privacyredirect.com/,medium.com,Scribe instance PrivacyRedirect,true
-medium,scribe,domain_replace,https://scribe.nixnet.services/,medium.com,Scribe instance Nixnet,true
-medium,scribe,domain_replace,https://scribe.rawbit.ninja/,medium.com,Scribe instance Rawbit,true
-medium,scribe,domain_replace,https://scribe.r4fo.com/,medium.com,Scribe instance R4fo,true
-imgur,rimgo,domain_replace,https://anaimg.starbeamrainbowlabs.com/,"imgur.com,i.imgur.com",Rimgo Starbeam instance,true
-imgur,rimgo,domain_replace,https://imgur.artemislena.eu/,"imgur.com,i.imgur.com",Rimgo Artemislena instance,true
-imgur,rimgo,domain_replace,https://imgur.nerdvpn.de/,"imgur.com,i.imgur.com",Rimgo NerdVPN instance,true
-imgur,rimgo,domain_replace,https://r.opnxng.com/,"imgur.com,i.imgur.com",Rimgo Opnxng instance,true
-imgur,rimgo,domain_replace,https://rimgo.bloat.cat/,"imgur.com,i.imgur.com",Rimgo Bloatcat instance,true
-imgur,rimgo,domain_replace,https://rimgo.canine.tools/,"imgur.com,i.imgur.com",Rimgo Canine tools instance,true
-imgur,rimgo,domain_replace,https://rimgo.catsarch.com/,"imgur.com,i.imgur.com",Rimgo Catsarch instance,false
-imgur,rimgo,domain_replace,https://rimgo.reallyaweso.me/,"imgur.com,i.imgur.com",Rimgo ReallyAwesome instance,true
-imgur,rimgo,domain_replace,https://rimgo.privacyredirect.com/,"imgur.com,i.imgur.com",Rimgo PrivacyRedirect instance,false
-imgur,rimgo,domain_replace,https://ri.bcow.xyz/,"imgur.com,i.imgur.com",Rimgo Bcow instance,false
-imgur,rimgo,domain_replace,https://ri.nadeko.net/,"imgur.com,i.imgur.com",Rimgo Nadeko instance,true
-imgur,rimgo,domain_replace,https://rimgo.nohost.network/,"imgur.com,i.imgur.com",Rimgo Nohost instance,true
-imgur,rimgo,domain_replace,https://rimgo.ducks.party/,"imgur.com,i.imgur.com",Rimgo Ducks Party instance,true
-imgur,rmgur,domain_replace,https://rmgur.com/,"imgur.com,i.imgur.com",Rmgur Imgur viewer,true
-imgur,rimgo,domain_replace,https://rimgo.aketawi.space/,"imgur.com,i.imgur.com",Rimgo Aketawi instance,true
-goodreads,biblioreads,domain_replace,https://biblioreads.privacyredirect.com/,goodreads.com,Biblioreads Goodreads frontend,true
-goodreads,biblioreads,domain_replace,https://biblioreads.eu.org/,goodreads.com,Biblioreads EU instance,true
-goodreads,biblioreads,domain_replace,https://biblioreads.vercel.app/,goodreads.com,Biblioreads Vercel instance,false
-goodreads,biblioreads,domain_replace,https://biblioreads.mooo.com/,goodreads.com,Biblioreads Mooo instance,true
-goodreads,biblioreads,domain_replace,https://biblioreads.lunar.icu/,goodreads.com,Biblioreads Lunar instance,true
-goodreads,biblioreads,domain_replace,https://read.freedit.eu/,goodreads.com,Biblioreads Freedit instance,true
-goodreads,biblioreads,domain_replace,https://biblioreads.ducks.party/,goodreads.com,Biblioreads Ducks Party instance,true
-goodreads,biblioreads,domain_replace,https://br.bloat.cat/,goodreads.com,Biblioreads Bloatcat instance,true
-goodreads,biblioreads,domain_replace,https://biblioreads.canine.tools/,goodreads.com,Biblioreads Canine Tools instance,true
-goodreads,biblioreads,domain_replace,https://biblioreads.birdcat.cafe/,goodreads.com,Biblioreads Birdcat Cafe instance,true
-ens,limo,append_ext,https://eth.limo/,*.eth,Ethereum Name Service Limo gateway,true
-i2p,i2p.surf,prepend,https://i2p.surf/proxy/,*.i2p,I2P Surf HTTP gateway proxy,true
+service,tech,type,proxy_url,patterns,description,active,auto-check
+general,archive.is,query_param,https://archive.is/submit/?url=,*,Archive.is web snapshot proxy,true,true
+general,archive.ph,query_param,https://archive.ph/submit/?url=,*,Archive.ph web snapshot proxy,true,true
+twitter,shitter,domain_replace,https://shitter.thepixora.com/,"x.com,twitter.com,xcancel.com,nitter.net,fixupx.com,vxtwitter.com",Shitter Twitter frontend,true,true
+twitter,nitter,domain_replace,https://nitter.kareem.one/,"x.com,twitter.com,xcancel.com,nitter.net,fixupx.com,vxtwitter.com",Nitter instance by Kareem,true,true
+twitter,dog nitter,domain_replace,https://nitter.miningtcup.me/,"x.com,twitter.com,xcancel.com,nitter.net,fixupx.com,vxtwitter.com",Dog Nitter instance,true,true
+twitter,nitter,domain_replace,https://nitter.meowing.monster/,"x.com,twitter.com,xcancel.com,nitter.net,fixupx.com,vxtwitter.com",Nitter instance Meowing Monster,true,true
+twitter,nitter,domain_replace,https://nitter.xitter.cc/,"x.com,twitter.com,xcancel.com,nitter.net,fixupx.com,vxtwitter.com",Nitter Xitter instance,true,true
+twitter,nitter,domain_replace,https://lightbrd.com/,"x.com,twitter.com,xcancel.com,nitter.net,fixupx.com,vxtwitter.com",Lightbrd Twitter frontend,true,true
+twitter,nitter,domain_replace,https://nitter.click/,"x.com,twitter.com,xcancel.com,nitter.net,fixupx.com,vxtwitter.com",Nitter click instance,true,true
+twitter,nitter,domain_replace,https://x.n0g.xyz/,"x.com,twitter.com,xcancel.com,nitter.net,fixupx.com,vxtwitter.com",Nitter n0g instance,true,true
+twitter,kitter,domain_replace,https://tw.eir-nya.gay/,"x.com,twitter.com,xcancel.com,nitter.net,fixupx.com,vxtwitter.com",Kitter Twitter frontend,true,true
+twitter,nitter,domain_replace,https://nitter.net/,"x.com,twitter.com,xcancel.com,nitter.net,fixupx.com,vxtwitter.com",Official Nitter instance,false,false
+twitter,xcancel,domain_replace,https://xcancel.com/,"x.com,twitter.com,nitter.net,fixupx.com,vxtwitter.com",XCancel Twitter frontend,true,true
+twitter,nitter,domain_replace,https://nitter.jaydenha.uk/,"x.com,twitter.com,xcancel.com,nitter.net,fixupx.com,vxtwitter.com",Nitter instance Jaydenha,true,true
+twitter,nitter,domain_replace,https://nitter.tiekoetter.com/,"x.com,twitter.com,xcancel.com,nitter.net,fixupx.com,vxtwitter.com",Nitter instance Tiekoetter,true,true
+twitter,nitter,domain_replace,https://nitter.catsarch.com/,"x.com,twitter.com,xcancel.com,nitter.net,fixupx.com,vxtwitter.com",Nitter instance Catsarch,false,true
+youtube,invidious,domain_replace,https://invidious.nerdvpn.de/,"youtube.com,youtu.be,m.youtube.com",Invidious instance by NerdVPN,false,true
+youtube,invidious,domain_replace,https://invidious.tiekoetter.com/,"youtube.com,youtu.be,m.youtube.com",Invidious instance Tiekoetter,true,true
+youtube,invidious,domain_replace,https://inv.nadeko.net/,"youtube.com,youtu.be,m.youtube.com",Invidious instance Nadeko,true,true
+youtube,invidious,domain_replace,https://yt.chocolatemoo53.com/,"youtube.com,youtu.be,m.youtube.com",Invidious instance Chocolatemoo53,true,true
+youtube,invidious,domain_replace,https://invidious.f5.si/,"youtube.com,youtu.be,m.youtube.com",Invidious instance F5,true,true
+youtube,invidious,domain_replace,https://yewtu.be/,"youtube.com,youtu.be,m.youtube.com",Yewtube Invidious instance,true,true
+youtube,invidious,domain_replace,https://invidious.flokinet.to/,"youtube.com,youtu.be,m.youtube.com",Invidious instance Flokinet,true,true
+instagram,kittygram,domain_replace,https://kittygram.pussthecat.org/,"instagram.com,instagr.am",Kittygram Pussthecat instance,true,false
+instagram,imginn,domain_replace,https://imginn.com/,"instagram.com,instagr.am",Imginn Instagram viewer,true,true
+instagram,kittygram,domain_replace,https://kittygram.privacyredirect.com/,"instagram.com,instagr.am",Kittygram PrivacyRedirect instance,true,true
+instagram,kittygram,domain_replace,https://kittygr.am/,"instagram.com,instagr.am",Kittygram main instance,true,true
+instagram,kittygram,domain_replace,https://kittygram.irelephant.net/,"instagram.com,instagr.am",Kittygram Irelephant instance,true,true
+instagram,kittygram,domain_replace,https://kittygram.nexussfan.cz/,"instagram.com,instagr.am",Kittygram Nexussfan instance,true,false
+instagram,kittygram,domain_replace,https://kittygram.kareem.one/,"instagram.com,instagr.am",Kittygram Kareem instance,true,true
+instagram,kittygram,domain_replace,https://kg.lus.lu/,"instagram.com,instagr.am",Kittygram Lus instance,true,true
+instagram,kittygram,domain_replace,https://kg.meowing.de/,"instagram.com,instagr.am",Kittygram Meowing instance,true,true
+instagram,kittygram,domain_replace,https://kittygram.nadeko.net/,"instagram.com,instagr.am",Kittygram Nadeko instance,true,true
+reddit,redlib,domain_replace,https://red.artemislena.eu/,"reddit.com,old.reddit.com,redd.it",Redlib instance Artemislena,true,true
+reddit,redlib,domain_replace,https://redlib.catsarch.com/,"reddit.com,old.reddit.com,redd.it",Redlib instance Catsarch,true,false
+reddit,redlib,domain_replace,https://redlib.privacyredirect.com/,"reddit.com,old.reddit.com,redd.it",Redlib instance PrivacyRedirect,true,true
+reddit,redlib,domain_replace,https://redlib-1.privadency.com/,"reddit.com,old.reddit.com,redd.it",Redlib instance Privadency,true,true
+reddit,redlib,domain_replace,https://safereddit.com/,"reddit.com,old.reddit.com,redd.it",SafeReddit Redlib instance,true,true
+reddit,eddrit,domain_replace,https://eddrit.com/,"reddit.com,old.reddit.com,redd.it",Eddrit alternative Reddit frontend,true,true
+reddit,redlib,domain_replace,https://redlib.nadeko.net/,"reddit.com,old.reddit.com,redd.it",Redlib instance Nadeko,true,true
+reddit,redlib,domain_replace,https://reddit.idevicehacked.com/,"reddit.com,old.reddit.com,redd.it",Redlib instance iDeviceHacked,true,true
+reddit,redlib,domain_replace,https://redlib.freedit.eu/,"reddit.com,old.reddit.com,redd.it",Redlib instance Freedit,true,true
+medium,scribe,domain_replace,https://m.opnxng.com/,medium.com,Scribe instance Opnxng,true, false
+medium,scribe,domain_replace,https://scribe.pussthecat.org/,medium.com,Scribe instance Pussthecat,true,true
+medium,scribe,domain_replace,https://scribe.privacyredirect.com/,medium.com,Scribe instance PrivacyRedirect,true,true
+medium,scribe,domain_replace,https://scribe.nixnet.services/,medium.com,Scribe instance Nixnet,true,true
+medium,scribe,domain_replace,https://scribe.rawbit.ninja/,medium.com,Scribe instance Rawbit,true,true
+medium,scribe,domain_replace,https://scribe.r4fo.com/,medium.com,Scribe instance R4fo,true,true
+imgur,rimgo,domain_replace,https://anaimg.starbeamrainbowlabs.com/,"imgur.com,i.imgur.com",Rimgo Starbeam instance,true,true
+imgur,rimgo,domain_replace,https://imgur.artemislena.eu/,"imgur.com,i.imgur.com",Rimgo Artemislena instance,true,true
+imgur,rimgo,domain_replace,https://imgur.nerdvpn.de/,"imgur.com,i.imgur.com",Rimgo NerdVPN instance,true,true
+imgur,rimgo,domain_replace,https://r.opnxng.com/,"imgur.com,i.imgur.com",Rimgo Opnxng instance,true,true
+imgur,rimgo,domain_replace,https://rimgo.bloat.cat/,"imgur.com,i.imgur.com",Rimgo Bloatcat instance,true,true
+imgur,rimgo,domain_replace,https://rimgo.canine.tools/,"imgur.com,i.imgur.com",Rimgo Canine tools instance,true,true
+imgur,rimgo,domain_replace,https://rimgo.catsarch.com/,"imgur.com,i.imgur.com",Rimgo Catsarch instance,true,false
+imgur,rimgo,domain_replace,https://rimgo.reallyaweso.me/,"imgur.com,i.imgur.com",Rimgo ReallyAwesome instance,false,true
+imgur,rimgo,domain_replace,https://rimgo.privacyredirect.com/,"imgur.com,i.imgur.com",Rimgo PrivacyRedirect instance,true,true
+imgur,rimgo,domain_replace,https://ri.bcow.xyz/,"imgur.com,i.imgur.com",Rimgo Bcow instance,true,false
+imgur,rimgo,domain_replace,https://ri.nadeko.net/,"imgur.com,i.imgur.com",Rimgo Nadeko instance,true,true
+imgur,rimgo,domain_replace,https://rimgo.nohost.network/,"imgur.com,i.imgur.com",Rimgo Nohost instance,false,true
+imgur,rimgo,domain_replace,https://rimgo.ducks.party/,"imgur.com,i.imgur.com",Rimgo Ducks Party instance,true,true
+imgur,rmgur,domain_replace,https://rmgur.com/,"imgur.com,i.imgur.com",Rmgur Imgur viewer,true,true
+imgur,rimgo,domain_replace,https://rimgo.aketawi.space/,"imgur.com,i.imgur.com",Rimgo Aketawi instance,true,true
+goodreads,biblioreads,domain_replace,https://biblioreads.privacyredirect.com/,goodreads.com,Biblioreads Goodreads frontend,true,true
+goodreads,biblioreads,domain_replace,https://biblioreads.eu.org/,goodreads.com,Biblioreads EU instance,true,true
+goodreads,biblioreads,domain_replace,https://biblioreads.vercel.app/,goodreads.com,Biblioreads Vercel instance,true,false
+goodreads,biblioreads,domain_replace,https://biblioreads.mooo.com/,goodreads.com,Biblioreads Mooo instance,true,true
+goodreads,biblioreads,domain_replace,https://biblioreads.lunar.icu/,goodreads.com,Biblioreads Lunar instance,true,true
+goodreads,biblioreads,domain_replace,https://read.freedit.eu/,goodreads.com,Biblioreads Freedit instance,true,true
+goodreads,biblioreads,domain_replace,https://biblioreads.ducks.party/,goodreads.com,Biblioreads Ducks Party instance,true,true
+goodreads,biblioreads,domain_replace,https://br.bloat.cat/,goodreads.com,Biblioreads Bloatcat instance,true,true
+goodreads,biblioreads,domain_replace,https://biblioreads.canine.tools/,goodreads.com,Biblioreads Canine Tools instance,true,true
+goodreads,biblioreads,domain_replace,https://biblioreads.birdcat.cafe/,goodreads.com,Biblioreads Birdcat Cafe instance,true,true
+ens,limo,append_ext,https://eth.limo/,*.eth,Ethereum Name Service Limo gateway,true,true
+i2p,i2p.surf,prepend,https://i2p.surf/proxy/,*.i2p,I2P Surf HTTP gateway proxy,true,true
