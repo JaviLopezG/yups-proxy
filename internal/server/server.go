@@ -279,6 +279,15 @@ func (s *Server) handleRoot(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (s *Server) renderError(w http.ResponseWriter, msg string, statusCode int) {
+	if err := s.renderer.RenderHelp(w, ui.HelpViewData{
+		ErrorMessage: msg,
+		BaseURL:      s.config.BaseURL,
+	}, statusCode); err != nil {
+		http.Error(w, msg, statusCode)
+	}
+}
+
 func (s *Server) serveResultsOrRedirect(w http.ResponseWriter, r *http.Request, forceResults bool) {
 	rawURL := strings.TrimSpace(r.URL.Query().Get("url"))
 	if rawURL == "" {
@@ -291,16 +300,74 @@ func (s *Server) serveResultsOrRedirect(w http.ResponseWriter, r *http.Request, 
 		if rec, ok := w.(*responseRecorder); ok {
 			rec.action = "INVALID_URL"
 		}
-		if errRender := s.renderer.RenderHelp(w, ui.HelpViewData{
-			ErrorMessage: fmt.Sprintf("Invalid URL provided: %v", err),
-			BaseURL:      s.config.BaseURL,
-		}, http.StatusBadRequest); errRender != nil {
-			http.Error(w, fmt.Sprintf("Invalid URL provided: %v", err), http.StatusBadRequest)
-		}
+		s.renderError(w, fmt.Sprintf("Invalid URL provided: %v", err), http.StatusBadRequest)
 		return
 	}
 
 	isBot := bot.IsSocialBot(r.UserAgent())
+
+	// Check if the input URL belongs to any configured proxy (active or inactive).
+	// If so, revert to the canonical original URL, choose a proxy distinct from itself,
+	// or fallback to the results page if no alternative proxy exists.
+	if matchedProxy, isProxy := s.registry.FindProxy(normURL); isProxy {
+		origURL, err := proxy.Revert(matchedProxy, normURL)
+		if err != nil {
+			if rec, ok := w.(*responseRecorder); ok {
+				rec.action = "REVERT_ERROR"
+			}
+			s.renderError(w, fmt.Sprintf("Failed to revert proxy URL: %v", err), http.StatusBadRequest)
+			return
+		}
+
+		normOrigURL, err := proxy.NormalizeURL(origURL)
+		if err != nil {
+			if rec, ok := w.(*responseRecorder); ok {
+				rec.action = "REVERT_ERROR"
+			}
+			s.renderError(w, fmt.Sprintf("Invalid reverted URL: %v", err), http.StatusBadRequest)
+			return
+		}
+
+		if isBot || forceResults {
+			s.serveResultsPage(w, r, normOrigURL, isBot)
+			return
+		}
+
+		// Find active proxy candidates for the service, excluding the matched proxy itself.
+		_, candidates := s.registry.MatchService(normOrigURL)
+		var distinct []proxy.Entry
+		for _, cand := range candidates {
+			if !proxy.IsSameProxy(cand, matchedProxy) {
+				distinct = append(distinct, cand)
+			}
+		}
+
+		// If no distinct active proxy exists, fallback to the results page instead of self-redirecting.
+		if len(distinct) == 0 {
+			s.serveResultsPage(w, r, normOrigURL, isBot)
+			return
+		}
+
+		if rec, ok := w.(*responseRecorder); ok {
+			rec.action = "REDIRECT"
+		}
+		picked, err := proxy.PickRandom(distinct)
+		if err != nil {
+			s.renderError(w, "No proxy available", http.StatusBadGateway)
+			return
+		}
+
+		destURL, err := proxy.Transform(picked, normOrigURL)
+		if err != nil {
+			s.renderError(w, "Failed to generate proxy redirect", http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Vary", "User-Agent")
+		w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
+		http.Redirect(w, r, destURL, http.StatusTemporaryRedirect)
+		return
+	}
 
 	// Condition to show results page instead of redirect:
 	// 1. Requester is a social media crawler (Telegram, Twitter, Discord, etc.)
@@ -324,13 +391,13 @@ func (s *Server) serveTemporaryRedirect(w http.ResponseWriter, r *http.Request, 
 
 	picked, err := proxy.PickRandom(candidates)
 	if err != nil {
-		http.Error(w, "No proxy available", http.StatusBadGateway)
+		s.renderError(w, "No proxy available", http.StatusBadGateway)
 		return
 	}
 
 	destURL, err := proxy.Transform(picked, normURL)
 	if err != nil {
-		http.Error(w, "Failed to generate proxy redirect", http.StatusInternalServerError)
+		s.renderError(w, "Failed to generate proxy redirect", http.StatusInternalServerError)
 		return
 	}
 

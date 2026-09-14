@@ -154,7 +154,12 @@ service,tech,type,proxy_url,patterns,description,active,auto-check
   - `append_ext`: Appends gateway domain (e.g., `.limo` for `.eth` ENS domains).
 - `proxy_url`: Base URL of the mirror.
 - `patterns`: Comma-separated domain patterns/wildcards to match (e.g.,
-  `x.com,twitter.com,xcancel.com`).
+  `x.com,twitter.com`). Any proxy URL defined in the dataset automatically acts
+  as a valid pattern for its service without needing to be listed here. When a
+  user submits a URL belonging to any proxy (active or inactive), YUPS
+  automatically reverts it to the original domain (using the first pattern as
+  the canonical host) and redirects to an alternative active mirror, or renders
+  the results page if no distinct mirror exists.
 - `description`: Short description of the instance.
 - `active`: Boolean flag (`true` or `false`) indicating whether the proxy is
   currently online and verified. Inactive proxies are ignored by the routing

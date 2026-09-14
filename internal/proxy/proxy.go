@@ -112,6 +112,52 @@ func (r *Registry) LoadFromReader(reader io.Reader) error {
 		})
 	}
 
+	// Automatically register all proxy hostnames as valid patterns for their respective services,
+	// without requiring manual duplication in the CSV 'patterns' column.
+	// We preserve original patterns in their initial positions so Patterns[0] remains the canonical domain.
+	proxyHostsByService := make(map[string][]string)
+	for _, entry := range entries {
+		if entry.Service == "general" {
+			continue
+		}
+		if pURL, err := url.Parse(entry.ProxyURL); err == nil {
+			host := strings.ToLower(pURL.Hostname())
+			cleanHost := strings.TrimPrefix(host, "www.")
+			if cleanHost != "" {
+				hosts := proxyHostsByService[entry.Service]
+				found := false
+				for _, h := range hosts {
+					if h == cleanHost {
+						found = true
+						break
+					}
+				}
+				if !found {
+					proxyHostsByService[entry.Service] = append(hosts, cleanHost)
+				}
+			}
+		}
+	}
+
+	for i := range entries {
+		if entries[i].Service == "general" {
+			continue
+		}
+		serviceHosts := proxyHostsByService[entries[i].Service]
+		for _, sh := range serviceHosts {
+			found := false
+			for _, pat := range entries[i].Patterns {
+				if pat == sh {
+					found = true
+					break
+				}
+			}
+			if !found {
+				entries[i].Patterns = append(entries[i].Patterns, sh)
+			}
+		}
+	}
+
 	r.mu.Lock()
 	r.entries = entries
 	r.mu.Unlock()
@@ -432,4 +478,173 @@ func Transform(entry Entry, targetURL string) (string, error) {
 	default:
 		return "", fmt.Errorf("unsupported proxy type: %s", entry.Type)
 	}
+}
+
+// FindProxy determines whether targetURL points to one of the configured proxies in the registry,
+// regardless of whether the proxy is active or inactive.
+func (r *Registry) FindProxy(targetURL string) (Entry, bool) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
+	parsedTarget, err := url.Parse(targetURL)
+	if err != nil {
+		return Entry{}, false
+	}
+
+	targetHost := strings.ToLower(parsedTarget.Hostname())
+	cleanTargetHost := strings.TrimPrefix(targetHost, "www.")
+
+	for _, entry := range r.entries {
+		if entry.Service == "general" {
+			continue
+		}
+		parsedProxy, err := url.Parse(entry.ProxyURL)
+		if err != nil {
+			continue
+		}
+		proxyHost := strings.ToLower(parsedProxy.Hostname())
+		cleanProxyHost := strings.TrimPrefix(proxyHost, "www.")
+
+		switch entry.Type {
+		case "domain_replace":
+			if cleanTargetHost == cleanProxyHost || strings.HasSuffix(cleanTargetHost, "."+cleanProxyHost) {
+				// Verify path prefix if proxy URL specifies a subpath
+				proxyPath := strings.TrimSuffix(parsedProxy.Path, "/")
+				if proxyPath == "" || strings.HasPrefix(parsedTarget.Path, proxyPath) {
+					return entry, true
+				}
+			}
+		case "append_ext":
+			ext := proxyHost
+			if strings.HasPrefix(proxyHost, "eth.") {
+				ext = strings.TrimPrefix(proxyHost, "eth.")
+			}
+			if strings.HasSuffix(cleanTargetHost, "."+ext) || cleanTargetHost == cleanProxyHost {
+				return entry, true
+			}
+		case "prepend":
+			if cleanTargetHost == cleanProxyHost {
+				proxyPath := strings.TrimSuffix(parsedProxy.Path, "/")
+				if proxyPath == "" || strings.HasPrefix(parsedTarget.Path, proxyPath) {
+					return entry, true
+				}
+			}
+		case "query_param":
+			if cleanTargetHost == cleanProxyHost {
+				return entry, true
+			}
+		}
+	}
+
+	return Entry{}, false
+}
+
+// Revert converts a URL from a known proxy instance back into its original canonical service URL.
+// For domain_replace, it uses entry.Patterns[0] as the canonical domain.
+func Revert(entry Entry, proxyTargetURL string) (string, error) {
+	if len(entry.Patterns) == 0 {
+		return "", fmt.Errorf("no patterns defined for service %s", entry.Service)
+	}
+
+	parsedTarget, err := url.Parse(proxyTargetURL)
+	if err != nil {
+		return "", fmt.Errorf("failed to parse proxy target url: %w", err)
+	}
+
+	switch entry.Type {
+	case "domain_replace":
+		firstPattern := entry.Patterns[0]
+		if firstPattern == "*" || strings.HasPrefix(firstPattern, "*.") {
+			return "", fmt.Errorf("invalid canonical domain pattern %q for service %s", firstPattern, entry.Service)
+		}
+
+		result := *parsedTarget
+		result.Host = firstPattern
+		if result.Scheme == "" {
+			result.Scheme = "https"
+		}
+
+		// Strip proxy path prefix if present
+		parsedProxy, err := url.Parse(entry.ProxyURL)
+		if err == nil {
+			proxyPath := strings.TrimSuffix(parsedProxy.Path, "/")
+			if proxyPath != "" && strings.HasPrefix(result.Path, proxyPath) {
+				result.Path = strings.TrimPrefix(result.Path, proxyPath)
+				if !strings.HasPrefix(result.Path, "/") {
+					result.Path = "/" + result.Path
+				}
+			}
+		}
+
+		return result.String(), nil
+
+	case "append_ext":
+		parsedProxy, err := url.Parse(entry.ProxyURL)
+		if err != nil {
+			return "", fmt.Errorf("failed to parse proxy url: %w", err)
+		}
+		proxyHost := strings.ToLower(parsedProxy.Hostname())
+		ext := proxyHost
+		if strings.HasPrefix(proxyHost, "eth.") {
+			ext = strings.TrimPrefix(proxyHost, "eth.")
+		}
+		targetHost := strings.ToLower(parsedTarget.Hostname())
+		suffix := "." + ext
+		if !strings.HasSuffix(targetHost, suffix) {
+			return "", fmt.Errorf("target host %q does not end with proxy extension %q", targetHost, ext)
+		}
+		origHost := targetHost[:len(targetHost)-len(suffix)]
+		result := *parsedTarget
+		result.Host = origHost
+		if result.Scheme == "" {
+			result.Scheme = "https"
+		}
+		return result.String(), nil
+
+	case "prepend":
+		parsedProxy, err := url.Parse(entry.ProxyURL)
+		if err != nil {
+			return "", fmt.Errorf("failed to parse proxy url: %w", err)
+		}
+		proxyPath := strings.TrimSuffix(parsedProxy.Path, "/")
+		targetPath := parsedTarget.Path
+		if !strings.HasPrefix(targetPath, proxyPath) {
+			return "", fmt.Errorf("target path %q does not have proxy prefix %q", targetPath, proxyPath)
+		}
+		remainder := strings.TrimPrefix(targetPath, proxyPath)
+		remainder = strings.TrimPrefix(remainder, "/")
+		if parsedTarget.RawQuery != "" {
+			remainder += "?" + parsedTarget.RawQuery
+		}
+		return NormalizeURL(remainder)
+
+	case "query_param":
+		qURL := parsedTarget.Query().Get("url")
+		if qURL != "" {
+			return NormalizeURL(qURL)
+		}
+		return "", fmt.Errorf("query parameter 'url' not found in proxy url %s", proxyTargetURL)
+
+	default:
+		return "", fmt.Errorf("unsupported proxy type for reversion: %s", entry.Type)
+	}
+}
+
+// IsSameProxy checks if two entries represent the same proxy service instance.
+func IsSameProxy(a, b Entry) bool {
+	if strings.EqualFold(strings.TrimRight(a.ProxyURL, "/"), strings.TrimRight(b.ProxyURL, "/")) {
+		return true
+	}
+	pa, errA := url.Parse(a.ProxyURL)
+	pb, errB := url.Parse(b.ProxyURL)
+	if errA == nil && errB == nil {
+		hostA := strings.TrimPrefix(strings.ToLower(pa.Hostname()), "www.")
+		hostB := strings.TrimPrefix(strings.ToLower(pb.Hostname()), "www.")
+		pathA := strings.TrimSuffix(pa.Path, "/")
+		pathB := strings.TrimSuffix(pb.Path, "/")
+		if hostA == hostB && pathA == pathB {
+			return true
+		}
+	}
+	return false
 }

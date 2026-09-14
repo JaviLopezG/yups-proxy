@@ -709,3 +709,110 @@ func TestStatusPageWithChecker(t *testing.T) {
 		t.Errorf("expected summary (idx %d) to appear BEFORE results (idx %d) in HTML", summaryIdx, resultsIdx)
 	}
 }
+
+func TestProxyURLReversionAndRedirection(t *testing.T) {
+	srv := setupTestServer(t)
+
+	t.Run("ActiveProxyRedirectsToDistinctProxy", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodGet, "/?url=https://nitter.kareem.one/jack/status/123", nil)
+		rec := httptest.NewRecorder()
+
+		srv.Handler().ServeHTTP(rec, req)
+
+		if rec.Code != http.StatusTemporaryRedirect {
+			t.Fatalf("expected 307 Temporary Redirect, got %d", rec.Code)
+		}
+		location := rec.Header().Get("Location")
+		if location == "" {
+			t.Fatalf("expected non-empty Location header")
+		}
+		if strings.Contains(location, "nitter.kareem.one") {
+			t.Errorf("expected redirect to a distinct proxy, got itself: %s", location)
+		}
+		if !strings.Contains(location, "/jack/status/123") {
+			t.Errorf("expected location to preserve path /jack/status/123, got: %s", location)
+		}
+	})
+
+	t.Run("InactiveProxyRevertsAndRedirectsToActiveProxy", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodGet, "/?url=https://nitter.net/jack/status/456", nil)
+		rec := httptest.NewRecorder()
+
+		srv.Handler().ServeHTTP(rec, req)
+
+		if rec.Code != http.StatusTemporaryRedirect {
+			t.Fatalf("expected 307 Temporary Redirect, got %d", rec.Code)
+		}
+		location := rec.Header().Get("Location")
+		if location == "" {
+			t.Fatalf("expected non-empty Location header")
+		}
+		if strings.Contains(location, "nitter.net") {
+			t.Errorf("expected redirect away from inactive proxy nitter.net, got: %s", location)
+		}
+		if !strings.Contains(location, "/jack/status/456") {
+			t.Errorf("expected location to preserve path /jack/status/456, got: %s", location)
+		}
+	})
+
+	t.Run("SingleProxyServiceFallbacksToResultsPage", func(t *testing.T) {
+		// ENS has only 1 gateway (eth.limo). When given eth.limo, there is no distinct proxy,
+		// so it must display the results page instead of redirecting.
+		req := httptest.NewRequest(http.MethodGet, "/?url=https://vitalik.eth.limo/about", nil)
+		rec := httptest.NewRecorder()
+
+		srv.Handler().ServeHTTP(rec, req)
+
+		if rec.Code != http.StatusOK {
+			t.Fatalf("expected 200 OK (results page) when no distinct proxy exists, got %d", rec.Code)
+		}
+		body := rec.Body.String()
+		if !strings.Contains(body, "Available Proxy Mirrors") {
+			t.Errorf("expected results page to contain 'Available Proxy Mirrors'")
+		}
+	})
+
+	t.Run("ProxyURLWithActionLinksShowsResults", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodGet, "/?url=https://nitter.kareem.one/jack/status/123&action=links", nil)
+		rec := httptest.NewRecorder()
+
+		srv.Handler().ServeHTTP(rec, req)
+
+		if rec.Code != http.StatusOK {
+			t.Fatalf("expected 200 OK for action=links, got %d", rec.Code)
+		}
+		body := rec.Body.String()
+		if !strings.Contains(body, "Available Proxy Mirrors") {
+			t.Errorf("expected results page")
+		}
+	})
+
+	t.Run("RevertErrorRendersErrorPage", func(t *testing.T) {
+		// Create a server with an entry that will fail reversion (wildcard pattern for domain_replace)
+		customReg := proxy.NewRegistry()
+		csvData := `service,tech,type,proxy_url,patterns,description,active,auto-check
+broken,broken_tech,domain_replace,https://broken.example.com/,*.invalid,Broken Proxy,true,true
+`
+		if err := customReg.LoadFromReader(strings.NewReader(csvData)); err != nil {
+			t.Fatalf("failed to load broken csv: %v", err)
+		}
+		cache := metadata.NewCache(1*time.Hour, nil)
+		brokenSrv, err := New(Config{AccessLog: false}, customReg, cache, nil)
+		if err != nil {
+			t.Fatalf("failed to create server: %v", err)
+		}
+
+		req := httptest.NewRequest(http.MethodGet, "/?url=https://broken.example.com/item/1", nil)
+		rec := httptest.NewRecorder()
+
+		brokenSrv.Handler().ServeHTTP(rec, req)
+
+		if rec.Code != http.StatusBadRequest {
+			t.Fatalf("expected 400 Bad Request on revert error, got %d", rec.Code)
+		}
+		body := rec.Body.String()
+		if !strings.Contains(body, "Failed to revert proxy URL") {
+			t.Errorf("expected error page with revert error message, got: %s", body)
+		}
+	})
+}

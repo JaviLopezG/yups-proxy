@@ -332,3 +332,160 @@ twitter,dead_nitter,domain_replace,https://dead.example.com/,x.com,Dead,false,tr
 		t.Fatalf("expected 3 candidates (active, manual, dead), got %d", len(candidates))
 	}
 }
+
+func TestFindProxy(t *testing.T) {
+	csvData := `service,tech,type,proxy_url,patterns,description,active,auto-check
+twitter,active_nitter,domain_replace,https://active.nitter.example.com/,x.com,Active,true,true
+twitter,dead_nitter,domain_replace,https://dead.nitter.example.com/,x.com,Dead,false,true
+ens,limo,append_ext,https://eth.limo/,*.eth,ENS Gateway,true,true
+i2p,i2p.surf,prepend,https://i2p.surf/proxy/,*.i2p,I2P Surf,true,true
+`
+	reg := NewRegistry()
+	if err := reg.LoadFromReader(strings.NewReader(csvData)); err != nil {
+		t.Fatalf("unexpected error loading csv: %v", err)
+	}
+
+	// 1. Match active proxy
+	entry, found := reg.FindProxy("https://active.nitter.example.com/user/status/1")
+	if !found {
+		t.Fatalf("expected to find active proxy entry")
+	}
+	if entry.Tech != "active_nitter" {
+		t.Errorf("expected active_nitter, got %s", entry.Tech)
+	}
+
+	// 2. Match inactive proxy
+	entry, found = reg.FindProxy("https://dead.nitter.example.com/user/status/2")
+	if !found {
+		t.Fatalf("expected to find dead proxy entry")
+	}
+	if entry.Tech != "dead_nitter" {
+		t.Errorf("expected dead_nitter, got %s", entry.Tech)
+	}
+
+	// 3. Match append_ext proxy
+	entry, found = reg.FindProxy("https://vitalik.eth.limo/posts/1")
+	if !found {
+		t.Fatalf("expected to find append_ext proxy entry")
+	}
+	if entry.Tech != "limo" {
+		t.Errorf("expected limo, got %s", entry.Tech)
+	}
+
+	// 4. Match prepend proxy
+	entry, found = reg.FindProxy("https://i2p.surf/proxy/forum.i2p/thread/1")
+	if !found {
+		t.Fatalf("expected to find prepend proxy entry")
+	}
+	if entry.Tech != "i2p.surf" {
+		t.Errorf("expected i2p.surf, got %s", entry.Tech)
+	}
+
+	// 5. Normal non-proxy URL should return false
+	_, found = reg.FindProxy("https://x.com/Wikipedia")
+	if found {
+		t.Errorf("expected false for original service url x.com")
+	}
+}
+
+func TestRevert(t *testing.T) {
+	tests := []struct {
+		name        string
+		entry       Entry
+		proxyURL    string
+		expectedURL string
+		wantErr     bool
+	}{
+		{
+			name: "twitter domain replacement",
+			entry: Entry{
+				Service:  "twitter",
+				Tech:     "nitter",
+				Type:     "domain_replace",
+				ProxyURL: "https://nitter.example.com/",
+				Patterns: []string{"x.com", "twitter.com"},
+			},
+			proxyURL:    "https://nitter.example.com/jack/status/20",
+			expectedURL: "https://x.com/jack/status/20",
+		},
+		{
+			name: "youtube domain replacement with query param",
+			entry: Entry{
+				Service:  "youtube",
+				Tech:     "invidious",
+				Type:     "domain_replace",
+				ProxyURL: "https://inv.example.com/",
+				Patterns: []string{"youtube.com", "youtu.be"},
+			},
+			proxyURL:    "https://inv.example.com/watch?v=dQw4w9WgXcQ",
+			expectedURL: "https://youtube.com/watch?v=dQw4w9WgXcQ",
+		},
+		{
+			name: "reddit domain replacement with path and query",
+			entry: Entry{
+				Service:  "reddit",
+				Tech:     "redlib",
+				Type:     "domain_replace",
+				ProxyURL: "https://redlib.example.com/",
+				Patterns: []string{"reddit.com", "old.reddit.com"},
+			},
+			proxyURL:    "https://redlib.example.com/r/golang?sort=top",
+			expectedURL: "https://reddit.com/r/golang?sort=top",
+		},
+		{
+			name: "ens limo append extension reversion",
+			entry: Entry{
+				Service:  "ens",
+				Tech:     "limo",
+				Type:     "append_ext",
+				ProxyURL: "https://eth.limo/",
+				Patterns: []string{"*.eth"},
+			},
+			proxyURL:    "https://vitalik.eth.limo/posts/1",
+			expectedURL: "https://vitalik.eth/posts/1",
+		},
+		{
+			name: "i2p prepend proxy reversion",
+			entry: Entry{
+				Service:  "i2p",
+				Tech:     "i2p.surf",
+				Type:     "prepend",
+				ProxyURL: "https://i2p.surf/proxy/",
+				Patterns: []string{"*.i2p"},
+			},
+			proxyURL:    "https://i2p.surf/proxy/forum.i2p/thread/1",
+			expectedURL: "https://forum.i2p/thread/1",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := Revert(tt.entry, tt.proxyURL)
+			if tt.wantErr {
+				if err == nil {
+					t.Fatalf("expected error, got nil")
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if got != tt.expectedURL {
+				t.Errorf("got %q, want %q", got, tt.expectedURL)
+			}
+		})
+	}
+}
+
+func TestIsSameProxy(t *testing.T) {
+	a := Entry{ProxyURL: "https://nitter.kareem.one/"}
+	b := Entry{ProxyURL: "https://nitter.kareem.one"}
+	c := Entry{ProxyURL: "https://lightbrd.com/"}
+
+	if !IsSameProxy(a, b) {
+		t.Errorf("expected a and b to be considered the same proxy")
+	}
+	if IsSameProxy(a, c) {
+		t.Errorf("expected a and c to be distinct proxies")
+	}
+}

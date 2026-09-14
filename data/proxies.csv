@@ -1,20 +1,20 @@
 service,tech,type,proxy_url,patterns,description,active,auto-check
 general,archive.is,query_param,https://archive.is/submit/?url=,*,Archive.is web snapshot proxy,true,true
 general,archive.ph,query_param,https://archive.ph/submit/?url=,*,Archive.ph web snapshot proxy,true,true
-twitter,shitter,domain_replace,https://shitter.thepixora.com/,"x.com,twitter.com,xcancel.com,nitter.net,fixupx.com,vxtwitter.com",Shitter Twitter frontend,false,true
-twitter,nitter,domain_replace,https://nitter.kareem.one/,"x.com,twitter.com,xcancel.com,nitter.net,fixupx.com,vxtwitter.com",Nitter instance by Kareem,true,true
-twitter,dog nitter,domain_replace,https://nitter.miningtcup.me/,"x.com,twitter.com,xcancel.com,nitter.net,fixupx.com,vxtwitter.com",Dog Nitter instance,true,true
-twitter,nitter,domain_replace,https://nitter.meowing.monster/,"x.com,twitter.com,xcancel.com,nitter.net,fixupx.com,vxtwitter.com",Nitter instance Meowing Monster,true,true
-twitter,nitter,domain_replace,https://nitter.xitter.cc/,"x.com,twitter.com,xcancel.com,nitter.net,fixupx.com,vxtwitter.com",Nitter Xitter instance,true,true
-twitter,nitter,domain_replace,https://lightbrd.com/,"x.com,twitter.com,xcancel.com,nitter.net,fixupx.com,vxtwitter.com",Lightbrd Twitter frontend,true,true
-twitter,nitter,domain_replace,https://nitter.click/,"x.com,twitter.com,xcancel.com,nitter.net,fixupx.com,vxtwitter.com",Nitter click instance,true,true
-twitter,nitter,domain_replace,https://x.n0g.xyz/,"x.com,twitter.com,xcancel.com,nitter.net,fixupx.com,vxtwitter.com",Nitter n0g instance,true,true
-twitter,kitter,domain_replace,https://tw.eir-nya.gay/,"x.com,twitter.com,xcancel.com,nitter.net,fixupx.com,vxtwitter.com",Kitter Twitter frontend,false,true
-twitter,nitter,domain_replace,https://nitter.net/,"x.com,twitter.com,xcancel.com,nitter.net,fixupx.com,vxtwitter.com",Official Nitter instance,false,false
+twitter,shitter,domain_replace,https://shitter.thepixora.com/,"x.com,twitter.com,fixupx.com,vxtwitter.com",Shitter Twitter frontend,false,true
+twitter,nitter,domain_replace,https://nitter.kareem.one/,"x.com,twitter.com,fixupx.com,vxtwitter.com",Nitter instance by Kareem,true,true
+twitter,dog nitter,domain_replace,https://nitter.miningtcup.me/,"x.com,twitter.com,fixupx.com,vxtwitter.com",Dog Nitter instance,true,true
+twitter,nitter,domain_replace,https://nitter.meowing.monster/,"x.com,twitter.com,fixupx.com,vxtwitter.com",Nitter instance Meowing Monster,true,true
+twitter,nitter,domain_replace,https://nitter.xitter.cc/,"x.com,twitter.com,fixupx.com,vxtwitter.com",Nitter Xitter instance,true,true
+twitter,nitter,domain_replace,https://lightbrd.com/,"x.com,twitter.com,fixupx.com,vxtwitter.com",Lightbrd Twitter frontend,true,true
+twitter,nitter,domain_replace,https://nitter.click/,"x.com,twitter.com,fixupx.com,vxtwitter.com",Nitter click instance,true,true
+twitter,nitter,domain_replace,https://x.n0g.xyz/,"x.com,twitter.com,fixupx.com,vxtwitter.com",Nitter n0g instance,true,true
+twitter,kitter,domain_replace,https://tw.eir-nya.gay/,"x.com,twitter.com,fixupx.com,vxtwitter.com",Kitter Twitter frontend,false,true
+twitter,nitter,domain_replace,https://nitter.net/,"x.com,twitter.com,fixupx.com,vxtwitter.com",Official Nitter instance,false,false
 twitter,xcancel,domain_replace,https://xcancel.com/,"x.com,twitter.com,nitter.net,fixupx.com,vxtwitter.com",XCancel Twitter frontend,false,true
-twitter,nitter,domain_replace,https://nitter.jaydenha.uk/,"x.com,twitter.com,xcancel.com,nitter.net,fixupx.com,vxtwitter.com",Nitter instance Jaydenha,true,true
-twitter,nitter,domain_replace,https://nitter.tiekoetter.com/,"x.com,twitter.com,xcancel.com,nitter.net,fixupx.com,vxtwitter.com",Nitter instance Tiekoetter,true,true
-twitter,nitter,domain_replace,https://nitter.catsarch.com/,"x.com,twitter.com,xcancel.com,nitter.net,fixupx.com,vxtwitter.com",Nitter instance Catsarch,false,true
+twitter,nitter,domain_replace,https://nitter.jaydenha.uk/,"x.com,twitter.com,fixupx.com,vxtwitter.com",Nitter instance Jaydenha,true,true
+twitter,nitter,domain_replace,https://nitter.tiekoetter.com/,"x.com,twitter.com,fixupx.com,vxtwitter.com",Nitter instance Tiekoetter,true,true
+twitter,nitter,domain_replace,https://nitter.catsarch.com/,"x.com,twitter.com,fixupx.com,vxtwitter.com",Nitter instance Catsarch,false,true
 youtube,invidious,domain_replace,https://invidious.nerdvpn.de/,"youtube.com,youtu.be,m.youtube.com",Invidious instance by NerdVPN,true,true
 youtube,invidious,domain_replace,https://invidious.tiekoetter.com/,"youtube.com,youtu.be,m.youtube.com",Invidious instance Tiekoetter,true,true
 youtube,invidious,domain_replace,https://inv.nadeko.net/,"youtube.com,youtu.be,m.youtube.com",Invidious instance Nadeko,true,true
