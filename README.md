@@ -86,10 +86,9 @@ make check-proxies
 make docker-build
 ```
 
-## Direct Go and Script Commands
+## Direct Go Commands
 
-If you prefer invoking Go and Python directly without Make, the underlying
-commands are:
+If you prefer invoking Go directly without Make, the underlying commands are:
 
 ```bash
 # Compile binary
@@ -105,21 +104,27 @@ go test -v ./...
 go test -v ./test/...
 
 # Verify proxy availability and update proxies.csv
-python3 ./scripts/check-proxies.py
+go run ./cmd/yups -check -update-csv
 ```
 
 ## Configuration
 
 YUPS can be configured via environment variables or command-line flags:
 
-| Variable          | Flag          | Default           | Description                                        |
-| ----------------- | ------------- | ----------------- | -------------------------------------------------- |
-| `PORT`            | `-port`       | `8080`            | Port for the HTTP server to listen on              |
-| `HOST`            | `-host`       | `0.0.0.0`         | Host IP interface to bind                          |
-| `BASE_URL`        | `-base-url`   | `https://yups.io` | Public URL prefix of the deployment                |
-| `PROXIES_FILE`    | `-proxies`    | (embedded)        | Path to custom proxies CSV file                    |
-| `YUPS_ACCESS_LOG` | `-access-log` | `true`            | Toggle structured access logging (easy to disable) |
-| `CACHE_TTL`       | `-cache-ttl`  | `24h`             | Time-to-live for scraped smart card metadata       |
+| Variable          | Flag              | Default           | Description                                        |
+| ----------------- | ----------------- | ----------------- | -------------------------------------------------- |
+| `PORT`            | `-port`           | `8080`            | Port for the HTTP server to listen on              |
+| `HOST`            | `-host`           | `0.0.0.0`         | Host IP interface to bind                          |
+| `BASE_URL`        | `-base-url`       | `https://yups.io` | Public URL prefix of the deployment                |
+| `PROXIES_FILE`    | `-proxies`        | (embedded)        | Path to custom proxies CSV file                    |
+| `YUPS_ACCESS_LOG` | `-access-log`     | `true`            | Toggle structured access logging (easy to disable) |
+| `CACHE_TTL`       | `-cache-ttl`      | `24h`             | Time-to-live for scraped smart card metadata       |
+| `CHECK_INTERVAL`  | `-check-interval` | `5m`              | Interval between background proxy health checks    |
+| `CHECK_TIMEOUT`   | `-check-timeout`  | `20s`             | HTTP timeout for proxy health checks               |
+| `CHECK_WORKERS`   | `-check-workers`  | `15`              | Concurrent worker pool size for proxy checks       |
+| `DISABLE_CHECK`   | `-disable-check`  | `false`           | Disable background proxy health checking           |
+|                   | `-check`          | `false`           | Run one-shot proxy check, print report, and exit   |
+|                   | `-update-csv`     | `false`           | In `-check` mode, save updated states to CSV file  |
 
 To disable access logging, pass `-access-log=false` or set
 `YUPS_ACCESS_LOG=false`.

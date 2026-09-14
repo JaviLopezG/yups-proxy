@@ -31,6 +31,8 @@ func main() {
 		checkTimeoutFlag  = flag.Duration("check-timeout", getEnvDuration("CHECK_TIMEOUT", 20*time.Second), "HTTP timeout for proxy health checks")
 		checkWorkersFlag  = flag.Int("check-workers", getEnvInt("CHECK_WORKERS", 15), "Number of concurrent workers for proxy health checks")
 		disableCheckFlag  = flag.Bool("disable-check", getEnvBool("DISABLE_CHECK", false), "Disable background proxy health checking")
+		checkOnlyFlag     = flag.Bool("check", false, "Run one-shot proxy availability check and exit")
+		updateCSVFlag     = flag.Bool("update-csv", false, "In -check mode, update proxies CSV file with check results")
 	)
 	flag.Parse()
 
@@ -48,6 +50,16 @@ func main() {
 		if err := reg.LoadFromReader(f); err != nil {
 			log.Fatalf("Failed to load proxies from %q: %v", *proxiesFlag, err)
 		}
+	} else if *checkOnlyFlag && fileExists("data/proxies.csv") {
+		log.Printf("Loading proxies from data/proxies.csv...")
+		f, err := os.Open("data/proxies.csv")
+		if err != nil {
+			log.Fatalf("Failed to open data/proxies.csv: %v", err)
+		}
+		defer f.Close()
+		if err := reg.LoadFromReader(f); err != nil {
+			log.Fatalf("Failed to load proxies from data/proxies.csv: %v", err)
+		}
 	} else {
 		log.Printf("Loading built-in proxy dataset...")
 		if err := reg.LoadDefault(); err != nil {
@@ -55,6 +67,30 @@ func main() {
 		}
 	}
 	log.Printf("Loaded %d proxy configurations (%d active).", len(reg.Entries()), len(reg.ActiveEntries()))
+
+	// One-shot check mode: verify proxies, print report to console, and exit
+	if *checkOnlyFlag {
+		log.Printf("Running one-shot proxy health check (timeout: %v, workers: %d)...", *checkTimeoutFlag, *checkWorkersFlag)
+		chk := checker.New(reg, *checkIntervalFlag, *checkTimeoutFlag, *checkWorkersFlag)
+		rep := chk.RunCheck(context.Background())
+		checker.PrintReport(os.Stdout, rep)
+
+		if *updateCSVFlag {
+			csvPath := *proxiesFlag
+			if csvPath == "" {
+				csvPath = "data/proxies.csv"
+			}
+			if fileExists(csvPath) {
+				if err := checker.UpdateCSV(csvPath, rep); err != nil {
+					log.Fatalf("Failed to update %s: %v", csvPath, err)
+				}
+				log.Printf("Updated %s successfully.", csvPath)
+			} else {
+				log.Printf("Warning: CSV file %s not found on disk, skipping CSV update.", csvPath)
+			}
+		}
+		return
+	}
 
 	// Initialize metadata cache with SSRF-safe HTTP client
 	safeClient := metadata.NewSafeHTTPClient(3 * time.Second)
@@ -153,3 +189,12 @@ func getEnvDuration(key string, fallback time.Duration) time.Duration {
 	}
 	return fallback
 }
+
+func fileExists(path string) bool {
+	info, err := os.Stat(path)
+	if err != nil {
+		return false
+	}
+	return !info.IsDir()
+}
+

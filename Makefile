@@ -26,7 +26,7 @@ test-raw:
 	go test -v ./...
 
 check-proxies:
-	./scripts/check-proxies.py
+	go run ./cmd/yups -check -update-csv
 
 docker-build:
 	docker build -t yups:latest .
