@@ -102,6 +102,9 @@ type ResultsViewData struct {
 	Card               any
 	FirstSeenFormatted string
 	Proxies            []ProxyLink
+	ActiveProxies      []ProxyLink
+	ManualProxies      []ProxyLink
+	InactiveProxies    []ProxyLink
 }
 
 // ProxyLink represents an available proxy destination for the results page.
@@ -109,6 +112,9 @@ type ProxyLink struct {
 	Tech           string
 	Description    string
 	DestinationURL string
+	Status         string
+	StatusLabel    string
+	StatusClass    string
 }
 
 // RenderResults renders the proxy results & smart card page.

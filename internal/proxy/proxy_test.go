@@ -312,3 +312,23 @@ instagram,kittygram,domain_replace,https://kittygram.pussthecat.org/,instagram.c
 		t.Errorf("expected pussthecat to be active=true and auto-check=false, got active=%v, autocheck=%v", entries[2].Active, entries[2].AutoCheck)
 	}
 }
+
+func TestMatchServiceAll(t *testing.T) {
+	csvData := `service,tech,type,proxy_url,patterns,description,active,auto-check
+twitter,active_nitter,domain_replace,https://active.example.com/,x.com,Active,true,true
+twitter,manual_nitter,domain_replace,https://manual.example.com/,x.com,Manual,true,false
+twitter,dead_nitter,domain_replace,https://dead.example.com/,x.com,Dead,false,true
+`
+	reg := NewRegistry()
+	if err := reg.LoadFromReader(strings.NewReader(csvData)); err != nil {
+		t.Fatalf("unexpected error loading csv: %v", err)
+	}
+
+	svc, candidates := reg.MatchServiceAll("https://x.com/Wikipedia")
+	if svc != "twitter" {
+		t.Fatalf("expected 'twitter', got %q", svc)
+	}
+	if len(candidates) != 3 {
+		t.Fatalf("expected 3 candidates (active, manual, dead), got %d", len(candidates))
+	}
+}

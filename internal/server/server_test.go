@@ -125,6 +125,59 @@ func TestUserExplicitLinks(t *testing.T) {
 	}
 }
 
+func TestResultsPageCategoryOrdering(t *testing.T) {
+	reg := proxy.NewRegistry()
+	csvData := `service,tech,type,proxy_url,patterns,description,active,auto-check
+twitter,active_mirror,domain_replace,https://active.example.com/,x.com,Active Mirror,true,true
+twitter,manual_mirror,domain_replace,https://manual.example.com/,x.com,Manual Mirror,true,false
+twitter,inactive_mirror,domain_replace,https://inactive.example.com/,x.com,Inactive Mirror,false,true
+`
+	if err := reg.LoadFromReader(strings.NewReader(csvData)); err != nil {
+		t.Fatalf("failed to load csv: %v", err)
+	}
+	cache := metadata.NewCache(1*time.Hour, nil)
+	chk := checker.New(reg, 5*time.Minute, 1*time.Second, 2)
+	srv, err := New(Config{AccessLog: false}, reg, cache, chk)
+	if err != nil {
+		t.Fatalf("failed to create server: %v", err)
+	}
+
+	req := httptest.NewRequest(http.MethodGet, "/?url=https://x.com/Wikipedia&action=links", nil)
+	rec := httptest.NewRecorder()
+
+	srv.Handler().ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("expected 200 OK, got %d", rec.Code)
+	}
+
+	body := rec.Body.String()
+	if !strings.Contains(body, "Active Proxies") {
+		t.Errorf("expected Active Proxies section")
+	}
+	if !strings.Contains(body, "Manual Mode Proxies") {
+		t.Errorf("expected Manual Mode Proxies section")
+	}
+	if !strings.Contains(body, "Inactive Proxies") {
+		t.Errorf("expected Inactive Proxies section")
+	}
+
+	activeIdx := strings.Index(body, "active_mirror")
+	manualIdx := strings.Index(body, "manual_mirror")
+	inactiveIdx := strings.Index(body, "inactive_mirror")
+
+	if activeIdx == -1 || manualIdx == -1 || inactiveIdx == -1 {
+		t.Fatalf("expected all 3 mirrors in body, got indices: %d, %d, %d", activeIdx, manualIdx, inactiveIdx)
+	}
+
+	if activeIdx >= manualIdx {
+		t.Errorf("expected active mirror (idx %d) to appear BEFORE manual mirror (idx %d)", activeIdx, manualIdx)
+	}
+	if manualIdx >= inactiveIdx {
+		t.Errorf("expected manual mirror (idx %d) to appear BEFORE inactive mirror (idx %d)", manualIdx, inactiveIdx)
+	}
+}
+
 func TestHealthCheck(t *testing.T) {
 	srv := setupTestServer(t)
 	req := httptest.NewRequest(http.MethodGet, "/healthz", nil)

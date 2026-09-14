@@ -355,19 +355,53 @@ func (s *Server) serveResultsPage(w http.ResponseWriter, r *http.Request, normUR
 	// Retrieve or scrape smart card info
 	card := s.cache.GetOrFetch(r.Context(), normURL)
 
-	service, candidates := s.registry.MatchService(normURL)
+	service, candidates := s.registry.MatchServiceAll(normURL)
 
-	proxyLinks := make([]ui.ProxyLink, 0, len(candidates))
+	var activeLinks, manualLinks, inactiveLinks []ui.ProxyLink
 	for _, cand := range candidates {
 		dest, err := proxy.Transform(cand, normURL)
-		if err == nil {
-			proxyLinks = append(proxyLinks, ui.ProxyLink{
-				Tech:           cand.Tech,
-				Description:    cand.Description,
-				DestinationURL: dest,
-			})
+		if err != nil {
+			continue
+		}
+
+		var status, statusLabel, statusClass string
+		if cand.Active && cand.AutoCheck {
+			status = "active"
+			statusLabel = "Active"
+			statusClass = "status-active"
+		} else if !cand.AutoCheck {
+			status = "manual"
+			statusLabel = "Manual"
+			statusClass = "status-manual"
+		} else {
+			status = "inactive"
+			statusLabel = "Inactive"
+			statusClass = "status-inactive"
+		}
+
+		link := ui.ProxyLink{
+			Tech:           cand.Tech,
+			Description:    cand.Description,
+			DestinationURL: dest,
+			Status:         status,
+			StatusLabel:    statusLabel,
+			StatusClass:    statusClass,
+		}
+
+		switch status {
+		case "active":
+			activeLinks = append(activeLinks, link)
+		case "manual":
+			manualLinks = append(manualLinks, link)
+		case "inactive":
+			inactiveLinks = append(inactiveLinks, link)
 		}
 	}
+
+	allProxies := make([]ui.ProxyLink, 0, len(activeLinks)+len(manualLinks)+len(inactiveLinks))
+	allProxies = append(allProxies, activeLinks...)
+	allProxies = append(allProxies, manualLinks...)
+	allProxies = append(allProxies, inactiveLinks...)
 
 	w.Header().Set("Vary", "User-Agent")
 	if isBot {
@@ -381,7 +415,10 @@ func (s *Server) serveResultsPage(w http.ResponseWriter, r *http.Request, normUR
 		Service:            strings.ToUpper(service),
 		Card:               card,
 		FirstSeenFormatted: card.FirstSeenAt.Format("2006-01-02 15:04:05 UTC"),
-		Proxies:            proxyLinks,
+		Proxies:            allProxies,
+		ActiveProxies:      activeLinks,
+		ManualProxies:      manualLinks,
+		InactiveProxies:    inactiveLinks,
 	}
 
 	if err := s.renderer.RenderResults(w, data); err != nil {

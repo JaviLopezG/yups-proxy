@@ -256,6 +256,58 @@ func (r *Registry) filterService(service string) []Entry {
 	return results
 }
 
+// MatchServiceAll determines which service matches the given normalized URL,
+// returning the service name and all proxy entries (active, manual, and inactive) for it.
+func (r *Registry) MatchServiceAll(targetURL string) (string, []Entry) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
+	parsed, err := url.Parse(targetURL)
+	if err != nil {
+		return "general", r.filterServiceAll("general")
+	}
+
+	host := strings.ToLower(parsed.Hostname())
+	cleanHost := strings.TrimPrefix(host, "www.")
+
+	// 1. Try matching service-specific patterns first across all entries
+	var matchedService string
+	for _, entry := range r.entries {
+		if entry.Service == "general" {
+			continue
+		}
+		for _, pattern := range entry.Patterns {
+			if matchesPattern(cleanHost, pattern) {
+				matchedService = entry.Service
+				break
+			}
+		}
+		if matchedService != "" {
+			break
+		}
+	}
+
+	if matchedService != "" {
+		candidates := r.filterServiceAll(matchedService)
+		if len(candidates) > 0 {
+			return matchedService, candidates
+		}
+	}
+
+	// 2. Fallback to general proxies
+	return "general", r.filterServiceAll("general")
+}
+
+func (r *Registry) filterServiceAll(service string) []Entry {
+	var results []Entry
+	for _, entry := range r.entries {
+		if strings.EqualFold(entry.Service, service) {
+			results = append(results, entry)
+		}
+	}
+	return results
+}
+
 func matchesPattern(host, pattern string) bool {
 	pattern = strings.ToLower(pattern)
 	if pattern == "*" {
