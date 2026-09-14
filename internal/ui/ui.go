@@ -6,6 +6,8 @@ import (
 	"html/template"
 	"io/fs"
 	"net/http"
+
+	"github.com/javilopezg/yups-proxy/internal/checker"
 )
 
 //go:embed templates/*
@@ -19,6 +21,7 @@ type Renderer struct {
 	indexTmpl   *template.Template
 	resultsTmpl *template.Template
 	helpTmpl    *template.Template
+	statusTmpl  *template.Template
 }
 
 // NewRenderer parses and prepares embedded HTML templates.
@@ -50,10 +53,20 @@ func NewRenderer() (*Renderer, error) {
 		return nil, fmt.Errorf("failed to parse help.html: %w", err)
 	}
 
+	statusContent, err := templatesFS.ReadFile("templates/status.html")
+	if err != nil {
+		return nil, fmt.Errorf("failed to read status.html: %w", err)
+	}
+	statusTmpl, err := template.New("status").Parse(string(statusContent))
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse status.html: %w", err)
+	}
+
 	return &Renderer{
 		indexTmpl:   indexTmpl,
 		resultsTmpl: resultsTmpl,
 		helpTmpl:    helpTmpl,
+		statusTmpl:  statusTmpl,
 	}, nil
 }
 
@@ -102,6 +115,27 @@ type ProxyLink struct {
 func (r *Renderer) RenderResults(w http.ResponseWriter, data ResultsViewData) error {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	return r.resultsTmpl.Execute(w, data)
+}
+
+// StatusViewData contains data required to render the proxy health status page.
+type StatusViewData struct {
+	HasReport          bool
+	CheckedAtFormatted string
+	DurationFormatted  string
+	Total              int
+	Active             int
+	Inactive           int
+	Skipped            int
+	Fallback           int
+	FallbackServices   []string
+	ByService          []checker.ServiceCounts
+	Results            []checker.CheckResult
+}
+
+// RenderStatus renders the proxy health check status page.
+func (r *Renderer) RenderStatus(w http.ResponseWriter, data StatusViewData) error {
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	return r.statusTmpl.Execute(w, data)
 }
 
 // StaticFileSystem returns an http.FileSystem serving the embedded static directory.

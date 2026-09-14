@@ -84,7 +84,7 @@ func setupBatteryServer(t *testing.T) *server.Server {
 	}
 
 	cache := metadata.NewCache(1*time.Hour, nil)
-	srv, err := server.New(server.Config{AccessLog: false}, reg, cache)
+	srv, err := server.New(server.Config{AccessLog: false}, reg, cache, nil)
 	if err != nil {
 		t.Fatalf("failed to create server: %v", err)
 	}

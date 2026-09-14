@@ -13,6 +13,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/javilopezg/yups-proxy/internal/checker"
 	"github.com/javilopezg/yups-proxy/internal/metadata"
 	"github.com/javilopezg/yups-proxy/internal/proxy"
 	"github.com/javilopezg/yups-proxy/internal/server"
@@ -20,12 +21,16 @@ import (
 
 func main() {
 	var (
-		hostFlag      = flag.String("host", getEnv("HOST", "0.0.0.0"), "HTTP server host")
-		portFlag      = flag.Int("port", getEnvInt("PORT", 8080), "HTTP server port")
-		baseURLFlag   = flag.String("base-url", getEnv("BASE_URL", "https://yups.io"), "Public base URL of the service")
-		proxiesFlag   = flag.String("proxies", getEnv("PROXIES_FILE", ""), "Path to custom proxies CSV file (default: embedded dataset)")
-		accessLogFlag = flag.Bool("access-log", getEnvBool("YUPS_ACCESS_LOG", true), "Enable HTTP access logging")
-		cacheTTLFlag  = flag.Duration("cache-ttl", getEnvDuration("CACHE_TTL", 24*time.Hour), "TTL for smart card metadata cache")
+		hostFlag          = flag.String("host", getEnv("HOST", "0.0.0.0"), "HTTP server host")
+		portFlag          = flag.Int("port", getEnvInt("PORT", 8080), "HTTP server port")
+		baseURLFlag       = flag.String("base-url", getEnv("BASE_URL", "https://yups.io"), "Public base URL of the service")
+		proxiesFlag       = flag.String("proxies", getEnv("PROXIES_FILE", ""), "Path to custom proxies CSV file (default: embedded dataset)")
+		accessLogFlag     = flag.Bool("access-log", getEnvBool("YUPS_ACCESS_LOG", true), "Enable HTTP access logging")
+		cacheTTLFlag      = flag.Duration("cache-ttl", getEnvDuration("CACHE_TTL", 24*time.Hour), "TTL for smart card metadata cache")
+		checkIntervalFlag = flag.Duration("check-interval", getEnvDuration("CHECK_INTERVAL", 5*time.Minute), "Interval between proxy health checks")
+		checkTimeoutFlag  = flag.Duration("check-timeout", getEnvDuration("CHECK_TIMEOUT", 20*time.Second), "HTTP timeout for proxy health checks")
+		checkWorkersFlag  = flag.Int("check-workers", getEnvInt("CHECK_WORKERS", 15), "Number of concurrent workers for proxy health checks")
+		disableCheckFlag  = flag.Bool("disable-check", getEnvBool("DISABLE_CHECK", false), "Disable background proxy health checking")
 	)
 	flag.Parse()
 
@@ -55,6 +60,12 @@ func main() {
 	safeClient := metadata.NewSafeHTTPClient(3 * time.Second)
 	cache := metadata.NewCache(*cacheTTLFlag, safeClient)
 
+	// Initialize proxy checker
+	var chk *checker.Checker
+	if !*disableCheckFlag {
+		chk = checker.New(reg, *checkIntervalFlag, *checkTimeoutFlag, *checkWorkersFlag)
+	}
+
 	// Create HTTP server
 	cfg := server.Config{
 		Host:      *hostFlag,
@@ -62,9 +73,14 @@ func main() {
 		BaseURL:   *baseURLFlag,
 		AccessLog: *accessLogFlag,
 	}
-	srv, err := server.New(cfg, reg, cache)
+	srv, err := server.New(cfg, reg, cache, chk)
 	if err != nil {
 		log.Fatalf("Failed to initialize server: %v", err)
+	}
+
+	// Start background proxy checker
+	if chk != nil {
+		chk.Start(context.Background())
 	}
 
 	addr := net.JoinHostPort(*hostFlag, strconv.Itoa(*portFlag))
@@ -90,6 +106,10 @@ func main() {
 
 	<-stopChan
 	log.Println("Shutting down YUPS server...")
+
+	if chk != nil {
+		chk.Stop()
+	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()

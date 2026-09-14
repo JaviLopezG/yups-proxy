@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/javilopezg/yups-proxy/internal/checker"
 	"github.com/javilopezg/yups-proxy/internal/metadata"
 	"github.com/javilopezg/yups-proxy/internal/proxy"
 )
@@ -18,7 +19,7 @@ func setupTestServer(t *testing.T) *Server {
 	}
 
 	cache := metadata.NewCache(1*time.Hour, nil)
-	srv, err := New(Config{AccessLog: false}, reg, cache)
+	srv, err := New(Config{AccessLog: false}, reg, cache, nil)
 	if err != nil {
 		t.Fatalf("failed to create server: %v", err)
 	}
@@ -545,5 +546,110 @@ func TestHomePagePrefixAndCopy(t *testing.T) {
 	}
 	if !strings.Contains(body, "https://yups.io/?url=") {
 		t.Errorf("expected body to contain default prefix 'https://yups.io/?url='")
+	}
+}
+
+func TestStatusPageNoReport(t *testing.T) {
+	srv := setupTestServer(t)
+	req := httptest.NewRequest(http.MethodGet, "/status", nil)
+	rec := httptest.NewRecorder()
+
+	srv.Handler().ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("expected 200 OK for /status, got %d", rec.Code)
+	}
+	body := rec.Body.String()
+	if !strings.Contains(body, "YUPS Proxy Status") {
+		t.Errorf("expected body to contain 'YUPS Proxy Status'")
+	}
+	if !strings.Contains(body, "Initial Health Check in Progress") {
+		t.Errorf("expected body to contain 'Initial Health Check in Progress'")
+	}
+	if !strings.Contains(body, "auto-refresh-toggle") {
+		t.Errorf("expected body to contain auto-refresh-toggle")
+	}
+	if !strings.Contains(body, "countdown-badge") {
+		t.Errorf("expected body to contain countdown-badge")
+	}
+}
+
+func TestStatusPageWithChecker(t *testing.T) {
+	reg := proxy.NewRegistry()
+	if err := reg.LoadDefault(); err != nil {
+		t.Fatalf("failed to load default proxies: %v", err)
+	}
+	cache := metadata.NewCache(1*time.Hour, nil)
+	chk := checker.New(reg, 5*time.Minute, 1*time.Second, 2)
+
+	report := &checker.Report{
+		Summary: checker.Summary{
+			CheckedAt:        time.Date(2026, 9, 14, 12, 0, 0, 0, time.UTC),
+			Duration:         2500 * time.Millisecond,
+			Total:            3,
+			Active:           2,
+			Inactive:         0,
+			Skipped:          1,
+			Fallback:         1,
+			FallbackServices: []string{"twitter"},
+			ByService: []checker.ServiceCounts{
+				{Service: "twitter", Active: 1, Inactive: 0, Skipped: 0, Fallback: 1},
+				{Service: "scribe", Active: 0, Inactive: 0, Skipped: 1, Fallback: 0},
+			},
+		},
+		Results: []checker.CheckResult{
+			{
+				Service:    "twitter",
+				ProxyURL:   "https://xcancel.com",
+				TargetURL:  "https://xcancel.com/Wikipedia",
+				StatusCode: 200,
+				DurationMs: 350,
+				IsActive:   true,
+				IsFallback: true,
+			},
+			{
+				Service:   "scribe",
+				ProxyURL:  "https://scribe.r4fo.com",
+				IsSkipped: true,
+			},
+		},
+	}
+	chk.SetReportForTesting(report)
+
+	srv, err := New(Config{AccessLog: false}, reg, cache, chk)
+	if err != nil {
+		t.Fatalf("failed to create server: %v", err)
+	}
+
+	req := httptest.NewRequest(http.MethodGet, "/status", nil)
+	rec := httptest.NewRecorder()
+
+	srv.Handler().ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("expected 200 OK for /status, got %d", rec.Code)
+	}
+	body := rec.Body.String()
+	if !strings.Contains(body, "YUPS Proxy Status") {
+		t.Errorf("expected body to contain 'YUPS Proxy Status'")
+	}
+	if !strings.Contains(body, "Proxy Health Summary") {
+		t.Errorf("expected body to contain 'Proxy Health Summary'")
+	}
+	if !strings.Contains(body, "Detailed Check Results") {
+		t.Errorf("expected body to contain 'Detailed Check Results'")
+	}
+	if !strings.Contains(body, "[PASS*]") {
+		t.Errorf("expected body to contain '[PASS*]' tag")
+	}
+	if !strings.Contains(body, "[SKIP]") {
+		t.Errorf("expected body to contain '[SKIP]' tag")
+	}
+
+	// Verify inverted order: Proxy Health Summary must appear BEFORE Detailed Check Results
+	summaryIdx := strings.Index(body, "Proxy Health Summary")
+	resultsIdx := strings.Index(body, "Detailed Check Results")
+	if summaryIdx == -1 || resultsIdx == -1 || summaryIdx >= resultsIdx {
+		t.Errorf("expected summary (idx %d) to appear BEFORE results (idx %d) in HTML", summaryIdx, resultsIdx)
 	}
 }

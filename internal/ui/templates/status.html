@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proxy Status - YUPS</title>
+    <meta name="description" content="Live proxy health check and availability status for YUPS.">
+
+    <!-- Favicons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/icons/logo-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/static/icons/logo-16.png">
+    <link rel="icon" type="image/x-icon" href="/static/icons/favicon-32.ico">
+
+    <style>
+        :root {
+            --primary-brown: #EAB796;
+            --detail-brown: #9E5A2E;
+            --dark-brown: #4A2810;
+            --bg-color: #FAF6F0;
+            --card-bg: #FFFFFF;
+            --text-color: #2D241E;
+            --muted-text: #7D6B5D;
+            --border-color: #E2D5C8;
+            --shadow-sm: 0 2px 4px rgba(74, 40, 16, 0.06);
+            --shadow-md: 0 4px 12px rgba(74, 40, 16, 0.1);
+
+            --terminal-bg: #1A1D20;
+            --terminal-text: #E6EDF3;
+            --terminal-border: #30363D;
+            --pass-color: #3FB950;
+            --fail-color: #F85149;
+            --skip-color: #D29922;
+            --fallback-color: #E3B341;
+            --dim-text: #8B949E;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        header {
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: var(--dark-brown);
+            font-weight: 700;
+            font-size: 1.15rem;
+        }
+
+        .header-brand img {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .refresh-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            color: var(--dark-brown);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .refresh-toggle input[type="checkbox"] {
+            cursor: pointer;
+            accent-color: var(--detail-brown);
+            width: 16px;
+            height: 16px;
+        }
+
+        .countdown-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            background: #F1E7DD;
+            color: var(--detail-brown);
+            font-size: 0.8rem;
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .btn-refresh {
+            padding: 6px 12px;
+            background: var(--detail-brown);
+            color: #FFFFFF;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.15s ease;
+        }
+
+        .btn-refresh:hover {
+            background: var(--dark-brown);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 16px;
+        }
+
+        .nav-links a {
+            color: var(--muted-text);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: color 0.15s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--dark-brown);
+        }
+
+        main {
+            flex: 1;
+            max-width: 1200px;
+            width: 100%;
+            margin: 24px auto;
+            padding: 0 20px;
+        }
+
+        .section-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--dark-brown);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .stat-box {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px 16px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.6rem;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--muted-text);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 4px;
+        }
+
+        .val-total { color: var(--dark-brown); }
+        .val-active { color: #2E7D32; }
+        .val-inactive { color: #C62828; }
+        .val-skipped { color: #B26A00; }
+        .val-fallback { color: #D48806; }
+
+        .notice-box {
+            background: #FFFBE6;
+            border: 1px solid #FFE58F;
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            color: #873800;
+            line-height: 1.4;
+        }
+
+        .breakdown-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .breakdown-table th, .breakdown-table td {
+            padding: 8px 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .breakdown-table th {
+            font-weight: 600;
+            color: var(--muted-text);
+            background: #FAF6F0;
+        }
+
+        .breakdown-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .terminal-container {
+            background: var(--terminal-bg);
+            border: 1px solid var(--terminal-border);
+            border-radius: 8px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: ui-monospace, SFMono-Regular, Consolas, Monaco, "Liberation Mono", Menlo, monospace;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            color: var(--terminal-text);
+        }
+
+        .term-row {
+            white-space: pre;
+            display: block;
+        }
+
+        .tag-pass { color: var(--pass-color); font-weight: 700; }
+        .tag-fail { color: var(--fail-color); font-weight: 700; }
+        .tag-skip { color: var(--skip-color); font-weight: 700; }
+        .tag-fallback { color: var(--fallback-color); font-weight: 700; }
+
+        .term-dim { color: var(--dim-text); }
+
+        footer {
+            border-top: 1px solid var(--border-color);
+            padding: 16px 24px;
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--muted-text);
+            background: var(--card-bg);
+        }
+
+        footer a {
+            color: var(--detail-brown);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                gap: 12px;
+                align-items: flex-start;
+            }
+            .header-controls {
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="/" class="header-brand">
+            <img src="/static/logo.png" alt="YUPS Logo">
+            <span>YUPS Proxy Status</span>
+        </a>
+
+        <div class="header-controls">
+            <label class="refresh-toggle" title="Automatically refresh every 5 minutes">
+                <input type="checkbox" id="auto-refresh-toggle" checked>
+                <span>Auto-refresh</span>
+            </label>
+            <span class="countdown-badge" id="countdown-badge">05:00</span>
+            <button class="btn-refresh" onclick="location.reload()">Refresh</button>
+            <div class="nav-links">
+                <a href="/">Home</a>
+                <a href="/help">Help</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        {{if not .HasReport}}
+        <div class="section-card" style="text-align: center; padding: 48px 24px;">
+            <h2 style="color: var(--dark-brown); margin-bottom: 12px;">Initial Health Check in Progress</h2>
+            <p style="color: var(--muted-text);">The background checker is verifying proxies for the first time. This page will update automatically once complete.</p>
+        </div>
+        {{else}}
+
+        <!-- 1. SUMMARY AT THE TOP -->
+        <section class="section-card">
+            <div class="section-title">
+                <span>Proxy Health Summary</span>
+                <span style="font-size: 0.85rem; font-weight: 400; color: var(--muted-text);">
+                    Checked: {{.CheckedAtFormatted}} (took {{.DurationFormatted}})
+                </span>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="stat-value val-total">{{.Total}}</div>
+                    <div class="stat-label">Total Proxies</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value val-active">{{.Active}}</div>
+                    <div class="stat-label">Active</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value val-inactive">{{.Inactive}}</div>
+                    <div class="stat-label">Inactive</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value val-skipped">{{.Skipped}}</div>
+                    <div class="stat-label">Manual</div>
+                </div>
+                {{if gt .Fallback 0}}
+                <div class="stat-box">
+                    <div class="stat-value val-fallback">{{.Fallback}}</div>
+                    <div class="stat-label">Fallback Active</div>
+                </div>
+                {{end}}
+            </div>
+
+            {{if .FallbackServices}}
+            <div class="notice-box">
+                <strong>Notice:</strong> All probed proxies were down or unresponsive for categories: <em>{{range $i, $s := .FallbackServices}}{{if $i}}, {{end}}{{$s}}{{end}}</em>.<br>
+                They have been kept active as a fallback in case an upstream bot challenge or software update expelled bot requests.
+            </div>
+            {{end}}
+
+            <h3 style="font-size: 1rem; color: var(--dark-brown); margin-bottom: 12px;">Breakdown by Service</h3>
+            <table class="breakdown-table">
+                <thead>
+                    <tr>
+                        <th>Service</th>
+                        <th>Active</th>
+                        <th>Inactive</th>
+                        <th>Manual / Skipped</th>
+                        <th>Category Fallback</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{range .ByService}}
+                    <tr>
+                        <td><strong>{{.Service}}</strong></td>
+                        <td style="color: #2E7D32; font-weight: 600;">{{.Active}}</td>
+                        <td style="color: {{if gt .Inactive 0}}#C62828{{else}}var(--muted-text){{end}};">{{.Inactive}}</td>
+                        <td style="color: var(--muted-text);">{{.Skipped}}</td>
+                        <td style="color: {{if gt .Fallback 0}}#D48806; font-weight: 600;{{else}}var(--muted-text){{end}};">{{.Fallback}}</td>
+                    </tr>
+                    {{end}}
+                </tbody>
+            </table>
+        </section>
+
+        <!-- 2. DETAIL AT THE BOTTOM -->
+        <section class="section-card">
+            <div class="section-title">
+                <span>Detailed Check Results</span>
+                <span style="font-size: 0.85rem; font-weight: 400; color: var(--muted-text);">{{len .Results}} entries</span>
+            </div>
+
+            <div class="terminal-container">
+                {{range .Results}}
+                <div class="term-row">  <span class="{{.TagClass}}">{{printf "%-8s" .Tag}}</span> {{printf "%-12s" .Service}} {{printf "%-16s" .Tech}} {{printf "%-40s" .TestURL}} <span class="term-dim">-></span> {{.Status}}</div>
+                {{end}}
+            </div>
+        </section>
+        {{end}}
+    </main>
+
+    <footer>
+        <p>YUPS (Your Unified Proxy Service) &middot; <a href="/status">Status</a> &middot; <a href="/help">Guide</a> &middot; <a href="/">Home</a></p>
+    </footer>
+
+    <script>
+        (function() {
+            const INTERVAL_SECONDS = 300; // 5 minutes
+            let secondsRemaining = INTERVAL_SECONDS;
+            let timerId = null;
+
+            const toggle = document.getElementById('auto-refresh-toggle');
+            const badge = document.getElementById('countdown-badge');
+
+            // Load saved preference
+            const savedPref = localStorage.getItem('yups_status_auto_refresh');
+            if (savedPref !== null) {
+                toggle.checked = (savedPref === 'true');
+            }
+
+            function updateDisplay() {
+                if (!toggle.checked) {
+                    badge.textContent = 'Paused';
+                    badge.style.background = '#E2D5C8';
+                    badge.style.color = '#7D6B5D';
+                    return;
+                }
+
+                badge.style.background = '#F1E7DD';
+                badge.style.color = 'var(--detail-brown)';
+
+                const minutes = Math.floor(secondsRemaining / 60);
+                const seconds = secondsRemaining % 60;
+                const formatted = String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0');
+                badge.textContent = formatted;
+            }
+
+            function tick() {
+                if (!toggle.checked) return;
+
+                secondsRemaining--;
+                if (secondsRemaining <= 0) {
+                    window.location.reload();
+                    return;
+                }
+                updateDisplay();
+            }
+
+            function startTimer() {
+                if (timerId) clearInterval(timerId);
+                secondsRemaining = INTERVAL_SECONDS;
+                updateDisplay();
+                timerId = setInterval(tick, 1000);
+            }
+
+            function stopTimer() {
+                if (timerId) {
+                    clearInterval(timerId);
+                    timerId = null;
+                }
+                updateDisplay();
+            }
+
+            toggle.addEventListener('change', function() {
+                localStorage.setItem('yups_status_auto_refresh', toggle.checked);
+                if (toggle.checked) {
+                    startTimer();
+                } else {
+                    stopTimer();
+                }
+            });
+
+            if (toggle.checked) {
+                startTimer();
+            } else {
+                updateDisplay();
+            }
+        })();
+    </script>
+</body>
+</html>
+

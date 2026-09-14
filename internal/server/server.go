@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/javilopezg/yups-proxy/internal/bot"
+	"github.com/javilopezg/yups-proxy/internal/checker"
 	"github.com/javilopezg/yups-proxy/internal/metadata"
 	"github.com/javilopezg/yups-proxy/internal/proxy"
 	"github.com/javilopezg/yups-proxy/internal/ui"
@@ -28,12 +29,13 @@ type Server struct {
 	config   Config
 	registry *proxy.Registry
 	cache    *metadata.Cache
+	checker  *checker.Checker
 	renderer *ui.Renderer
 	mux      *http.ServeMux
 }
 
 // New creates and configures a new Server instance.
-func New(cfg Config, registry *proxy.Registry, cache *metadata.Cache) (*Server, error) {
+func New(cfg Config, registry *proxy.Registry, cache *metadata.Cache, chk *checker.Checker) (*Server, error) {
 	renderer, err := ui.NewRenderer()
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize ui renderer: %w", err)
@@ -43,6 +45,7 @@ func New(cfg Config, registry *proxy.Registry, cache *metadata.Cache) (*Server, 
 		config:   cfg,
 		registry: registry,
 		cache:    cache,
+		checker:  chk,
 		renderer: renderer,
 		mux:      http.NewServeMux(),
 	}
@@ -64,6 +67,9 @@ func (s *Server) routes() {
 
 	// Explicit proxy links endpoint
 	s.mux.HandleFunc("/links", s.handleLinks)
+
+	// Status page
+	s.mux.HandleFunc("/status", s.handleStatus)
 
 	// Main routing endpoint
 	s.mux.HandleFunc("/", s.handleRoot)
@@ -161,6 +167,41 @@ func (s *Server) handleHelp(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) handleLinks(w http.ResponseWriter, r *http.Request) {
 	s.serveResultsOrRedirect(w, r, true)
+}
+
+func (s *Server) handleStatus(w http.ResponseWriter, r *http.Request) {
+	if rec, ok := w.(*responseRecorder); ok {
+		rec.action = "STATUS"
+	}
+	if r.Method != http.MethodGet && r.Method != http.MethodHead {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var data ui.StatusViewData
+	if s.checker != nil {
+		rep := s.checker.LastReport()
+		if rep != nil {
+			data = ui.StatusViewData{
+				HasReport:          true,
+				CheckedAtFormatted: rep.Summary.CheckedAt.Format("2006-01-02 15:04:05 UTC"),
+				DurationFormatted:  fmt.Sprintf("%.2fs", rep.Summary.Duration.Seconds()),
+				Total:              rep.Summary.Total,
+				Active:             rep.Summary.Active,
+				Inactive:           rep.Summary.Inactive,
+				Skipped:            rep.Summary.Skipped,
+				Fallback:           rep.Summary.Fallback,
+				FallbackServices:   rep.Summary.FallbackServices,
+				ByService:          rep.Summary.ByService,
+				Results:            rep.Results,
+			}
+		}
+	}
+
+	if err := s.renderer.RenderStatus(w, data); err != nil {
+		log.Printf("ERROR: failed to render status page: %v", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+	}
 }
 
 func (s *Server) handleRoot(w http.ResponseWriter, r *http.Request) {
@@ -371,7 +412,7 @@ func (s *Server) tryPathRecovery(w http.ResponseWriter, r *http.Request) bool {
 		firstSegment = firstSegment[:idx]
 	}
 	switch firstSegment {
-	case "help", "healthz", "links", "static", "favicon.ico", "robots.txt":
+	case "help", "healthz", "links", "status", "static", "favicon.ico", "robots.txt":
 		return false
 	}
 

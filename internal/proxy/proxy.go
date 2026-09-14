@@ -8,6 +8,7 @@ import (
 	"math/big"
 	"net/url"
 	"strings"
+	"sync"
 
 	"github.com/javilopezg/yups-proxy/data"
 )
@@ -24,8 +25,9 @@ type Entry struct {
 	AutoCheck   bool
 }
 
-// Registry manages proxy definitions and transformation rules.
+// Registry manages proxy definitions and transformation rules with thread-safe access.
 type Registry struct {
+	mu      sync.RWMutex
 	entries []Entry
 }
 
@@ -110,7 +112,9 @@ func (r *Registry) LoadFromReader(reader io.Reader) error {
 		})
 	}
 
+	r.mu.Lock()
 	r.entries = entries
+	r.mu.Unlock()
 	return nil
 }
 
@@ -133,13 +137,19 @@ func (r *Registry) LoadDefault() error {
 	return r.LoadFromReader(strings.NewReader(string(data.DefaultProxiesCSV)))
 }
 
-// Entries returns all loaded entries.
+// Entries returns a copy of all loaded entries.
 func (r *Registry) Entries() []Entry {
-	return r.entries
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	copied := make([]Entry, len(r.entries))
+	copy(copied, r.entries)
+	return copied
 }
 
 // ActiveEntries returns all loaded entries that are marked active.
 func (r *Registry) ActiveEntries() []Entry {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
 	var active []Entry
 	for _, e := range r.entries {
 		if e.Active {
@@ -147,6 +157,17 @@ func (r *Registry) ActiveEntries() []Entry {
 		}
 	}
 	return active
+}
+
+// UpdateActiveStates applies new active statuses to entries by their index in a thread-safe way.
+func (r *Registry) UpdateActiveStates(activeStates map[int]bool) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	for idx, active := range activeStates {
+		if idx >= 0 && idx < len(r.entries) {
+			r.entries[idx].Active = active
+		}
+	}
 }
 
 // NormalizeURL cleans and ensures a valid absolute URL scheme.
@@ -183,6 +204,9 @@ func NormalizeURL(raw string) (string, error) {
 // MatchService determines which service matches the given normalized URL.
 // Returns the service name and the list of available proxy entries for it.
 func (r *Registry) MatchService(targetURL string) (string, []Entry) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
 	parsed, err := url.Parse(targetURL)
 	if err != nil {
 		return "general", r.filterService("general")
