@@ -309,10 +309,16 @@ func Transform(entry Entry, targetURL string) (string, error) {
 
 	case "prepend":
 		base := entry.ProxyURL
-		if !strings.HasSuffix(base, "/") && !strings.HasPrefix(targetURL, "/") {
+		cleanTarget := targetURL
+		if idx := strings.Index(cleanTarget, "://"); idx != -1 {
+			cleanTarget = cleanTarget[idx+3:]
+		}
+		if strings.HasSuffix(base, "/") && strings.HasPrefix(cleanTarget, "/") {
+			cleanTarget = strings.TrimPrefix(cleanTarget, "/")
+		} else if !strings.HasSuffix(base, "/") && !strings.HasPrefix(cleanTarget, "/") {
 			base += "/"
 		}
-		return base + targetURL, nil
+		return base + cleanTarget, nil
 
 	case "append_ext":
 		proxyParsed, err := url.Parse(entry.ProxyURL)

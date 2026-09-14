@@ -62,7 +62,7 @@ imgur,rimgo,domain_replace,https://rimgo.nohost.network/,"imgur.com,i.imgur.com"
 imgur,rimgo,domain_replace,https://rimgo.ducks.party/,"imgur.com,i.imgur.com",Rimgo Ducks Party instance,false,true
 imgur,rmgur,domain_replace,https://rmgur.com/,"imgur.com,i.imgur.com",Rmgur Imgur viewer,true,true
 imgur,rimgo,domain_replace,https://rimgo.aketawi.space/,"imgur.com,i.imgur.com",Rimgo Aketawi instance,true,true
-goodreads,biblioreads,domain_replace,https://biblioreads.privacyredirect.com/,goodreads.com,Biblioreads Goodreads frontend,true,true
+goodreads,biblioreads,domain_replace,https://biblioreads.privacyredirect.com/,goodreads.com,Biblioreads Goodreads frontend,false,true
 goodreads,biblioreads,domain_replace,https://biblioreads.eu.org/,goodreads.com,Biblioreads EU instance,true,true
 goodreads,biblioreads,domain_replace,https://biblioreads.vercel.app/,goodreads.com,Biblioreads Vercel instance,true,false
 goodreads,biblioreads,domain_replace,https://biblioreads.mooo.com/,goodreads.com,Biblioreads Mooo instance,true,true

@@ -68,7 +68,7 @@ var batteryServices = []serviceTestCase{
 	{
 		Service:            "I2P",
 		TargetURL:          "http://forum.i2p/thread/1",
-		ExpectedDestSubstr: "i2p.surf/proxy/http://forum.i2p/thread/1",
+		ExpectedDestSubstr: "i2p.surf/proxy/forum.i2p/thread/1",
 	},
 	{
 		Service:            "GeneralFallback",

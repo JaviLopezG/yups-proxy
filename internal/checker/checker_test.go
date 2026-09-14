@@ -46,7 +46,7 @@ func TestBuildTestURL(t *testing.T) {
 				Type:     "prepend",
 				ProxyURL: "https://i2p.surf/proxy/",
 			},
-			expected: "https://i2p.surf/proxy/https://stormycloud.i2p/",
+			expected: "https://i2p.surf/proxy/stormycloud.i2p/",
 		},
 		{
 			entry: proxy.Entry{

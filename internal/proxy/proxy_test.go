@@ -151,7 +151,18 @@ func TestTransform(t *testing.T) {
 				ProxyURL: "https://i2p.surf/proxy/",
 			},
 			targetURL:  "http://forum.i2p/index.php",
-			wantPrefix: "https://i2p.surf/proxy/http://forum.i2p/index.php",
+			wantPrefix: "https://i2p.surf/proxy/forum.i2p/index.php",
+		},
+		{
+			name: "i2p prepend proxy with https",
+			entry: Entry{
+				Service:  "i2p",
+				Tech:     "i2p.surf",
+				Type:     "prepend",
+				ProxyURL: "https://i2p.surf/proxy/",
+			},
+			targetURL:  "https://stormycloud.i2p/",
+			wantPrefix: "https://i2p.surf/proxy/stormycloud.i2p/",
 		},
 		{
 			name: "general query param proxy",

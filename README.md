@@ -149,7 +149,8 @@ service,tech,type,proxy_url,patterns,description,active,auto-check
     keeping path and query.
   - `query_param`: Appends the full target URL to the proxy base URL query
     string.
-  - `prepend`: Prepends the proxy base URL directly to the target URL.
+  - `prepend`: Prepends the proxy base URL directly to the target URL (without
+    scheme, e.g. for I2P web gateways).
   - `append_ext`: Appends gateway domain (e.g., `.limo` for `.eth` ENS domains).
 - `proxy_url`: Base URL of the mirror.
 - `patterns`: Comma-separated domain patterns/wildcards to match (e.g.,
@@ -159,7 +160,7 @@ service,tech,type,proxy_url,patterns,description,active,auto-check
   currently online and verified. Inactive proxies are ignored by the routing
   service.
 - `auto-check`: Boolean flag (`true` or `false`) indicating whether the proxy
-  should be probed automatically by `scripts/check-proxies.py`. Proxies with
+  should be probed automatically by background/CLI health checks. Proxies with
   `auto-check=false` are skipped during automated checks, preserving their
   manual `active` status and highlighted in yellow in terminal logs.
 
