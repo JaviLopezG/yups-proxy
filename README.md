@@ -132,7 +132,7 @@ and opening a pull request.
 The CSV structure:
 
 ```csv
-service,tech,type,proxy_url,patterns,description,active
+service,tech,type,proxy_url,patterns,description,active,auto-check
 ```
 
 - `service`: Identifier for the platform (e.g., `twitter`, `reddit`, `youtube`,
@@ -153,6 +153,10 @@ service,tech,type,proxy_url,patterns,description,active
 - `active`: Boolean flag (`true` or `false`) indicating whether the proxy is
   currently online and verified. Inactive proxies are ignored by the routing
   service.
+- `auto-check`: Boolean flag (`true` or `false`) indicating whether the proxy
+  should be probed automatically by `scripts/check-proxies.py`. Proxies with
+  `auto-check=false` are skipped during automated checks, preserving their
+  manual `active` status and highlighted in yellow in terminal logs.
 
 We invite everyone to self-host their own instances, replicate the dataset, and
 contribute improvements.

@@ -99,6 +99,15 @@ def check_proxy_health(target_url: str, timeout: float, ssl_ctx: ssl.SSLContext)
         return (type(e).__name__, False)
 
 
+def parse_bool(val: str, default: bool = True) -> bool:
+    v = val.strip().lower()
+    if v in ("true", "1", "yes", "y", "t", "active"):
+        return True
+    if v in ("false", "0", "no", "n", "f", "inactive"):
+        return False
+    return default
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Verify proxy availability and update data/proxies.csv."
@@ -139,16 +148,23 @@ def main():
             sys.exit(1)
         rows = [row for row in reader if row]
 
-    # Find or append the active column
+    # Find or append the active and auto-check columns
     active_col_idx = -1
+    auto_check_col_idx = -1
     for idx, col in enumerate(header):
-        if col.strip().lower() == "active":
+        normalized = col.strip().lower().replace("_", "-")
+        if normalized == "active":
             active_col_idx = idx
-            break
+        elif normalized in ("auto-check", "autocheck", "check"):
+            auto_check_col_idx = idx
 
     if active_col_idx == -1:
         header.append("active")
         active_col_idx = len(header) - 1
+
+    if auto_check_col_idx == -1:
+        header.append("auto-check")
+        auto_check_col_idx = len(header) - 1
 
     print(f"{BOLD}Checking proxy availability ({len(rows)} proxies)...{RESET}\n")
 
@@ -163,44 +179,84 @@ def main():
         return index, test_url, status, is_active
 
     results = {}
+    rows_to_probe = []
+
+    for idx, r in enumerate(rows):
+        # Determine existing active state
+        curr_active_val = r[active_col_idx].strip() if len(r) > active_col_idx else ""
+        curr_active = parse_bool(curr_active_val, default=True)
+
+        # Determine auto-check flag
+        auto_check_val = r[auto_check_col_idx].strip() if len(r) > auto_check_col_idx else ""
+        should_check = parse_bool(auto_check_val, default=True)
+
+        proxy_url = r[3].strip() if len(r) > 3 else ""
+        test_url = get_homepage_url(proxy_url)
+
+        if not should_check:
+            # Skip automatic probing; retain current active state
+            results[idx] = (test_url, "manual check", curr_active, True)
+        else:
+            rows_to_probe.append((idx, r, test_url))
+
     with ThreadPoolExecutor(max_workers=args.concurrency) as executor:
         futures = {
             executor.submit(probe_row, idx, r): idx
-            for idx, r in enumerate(rows)
+            for idx, r, _ in rows_to_probe
         }
         for future in as_completed(futures):
             idx, test_url, status, is_active = future.result()
-            results[idx] = (test_url, status, is_active)
+            results[idx] = (test_url, status, is_active, False)
 
     # Process in original order for clean terminal output and CSV writing
     active_count = 0
     inactive_count = 0
+    skipped_count = 0
     by_service: dict[str, dict[str, int]] = {}
 
     updated_rows = []
     for idx, row in enumerate(rows):
-        test_url, status, is_active = results[idx]
+        test_url, status, is_active, is_skipped = results[idx]
         service = row[0].strip() if row else "unknown"
         tech = row[1].strip() if len(row) > 1 else ""
 
-        by_service.setdefault(service, {"active": 0, "inactive": 0})
+        by_service.setdefault(service, {"active": 0, "inactive": 0, "skipped": 0})
 
-        if is_active:
-            active_count += 1
-            by_service[service]["active"] += 1
-            tag = f"[{GREEN}PASS{RESET}]"
+        if is_skipped:
+            skipped_count += 1
+            by_service[service]["skipped"] += 1
+            if is_active:
+                active_count += 1
+                by_service[service]["active"] += 1
+            else:
+                inactive_count += 1
+                by_service[service]["inactive"] += 1
+
+            tag = f"[{YELLOW}SKIP{RESET}]"
+            state_str = "active" if is_active else "inactive"
+            print(f"  {tag} {YELLOW}{service:<12} {tech:<16} {test_url:<40} -> manual review (kept {state_str}){RESET}")
         else:
-            inactive_count += 1
-            by_service[service]["inactive"] += 1
-            tag = f"[{RED}FAIL{RESET}]"
+            if is_active:
+                active_count += 1
+                by_service[service]["active"] += 1
+                tag = f"[{GREEN}PASS{RESET}]"
+            else:
+                inactive_count += 1
+                by_service[service]["inactive"] += 1
+                tag = f"[{RED}FAIL{RESET}]"
 
-        print(f"  {tag} {service:<12} {tech:<16} {test_url:<40} -> {status}")
+            print(f"  {tag} {service:<12} {tech:<16} {test_url:<40} -> {status}")
 
         # Update row active value
         active_val = "true" if is_active else "false"
-        while len(row) <= active_col_idx:
+        while len(row) <= max(active_col_idx, auto_check_col_idx):
             row.append("")
         row[active_col_idx] = active_val
+
+        # Preserve auto-check value
+        if not row[auto_check_col_idx].strip():
+            row[auto_check_col_idx] = "false" if is_skipped else "true"
+
         updated_rows.append(row)
 
     # Write updated CSV back
@@ -213,14 +269,17 @@ def main():
     print(
         f"Total: {len(rows)} | "
         f"{GREEN}Active: {active_count}{RESET} | "
-        f"{RED}Inactive: {inactive_count}{RESET}"
+        f"{RED}Inactive: {inactive_count}{RESET} | "
+        f"{YELLOW}Manual/Skipped: {skipped_count}{RESET}"
     )
     print(f"{BOLD}Breakdown by service:{RESET}")
     for svc, counts in sorted(by_service.items()):
         act = counts["active"]
         inact = counts["inactive"]
+        skp = counts["skipped"]
         color = GREEN if act > 0 else RED
-        print(f"  - {svc:<14}: {color}{act} active{RESET}, {inact} inactive")
+        skp_str = f", {YELLOW}{skp} manual{RESET}" if skp > 0 else ""
+        print(f"  - {svc:<14}: {color}{act} active{RESET}, {inact} inactive{skp_str}")
 
     print(f"{BOLD}══════════════════════════════════════════════════════════{RESET}")
     print(f"Updated {csv_path} successfully.")
