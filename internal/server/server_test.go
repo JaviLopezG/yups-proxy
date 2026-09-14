@@ -359,13 +359,18 @@ func TestErrorRecoveryExtraParams(t *testing.T) {
 		wantLocation string
 	}{
 		{
-			name:         "url with extra q param",
+			name:         "UrlWithExtraQParam",
 			query:        "/?url=https://x.com/Wikipedia&q=algo",
 			wantLocation: "/?url=https%3A%2F%2Fx.com%2FWikipedia&action=links",
 		},
 		{
-			name:         "url with utm tracking params",
-			query:        "/?url=https://x.com/Wikipedia&utm_source=twitter&utm_medium=feed",
+			name:         "UrlWithUnknownParam",
+			query:        "/?url=https://x.com/Wikipedia&custom_param=123",
+			wantLocation: "/?url=https%3A%2F%2Fx.com%2FWikipedia&action=links",
+		},
+		{
+			name:         "UrlWithIgnoredAndUnknownParam",
+			query:        "/?url=https://x.com/Wikipedia&utm_source=twitter&unknown_param=xyz",
 			wantLocation: "/?url=https%3A%2F%2Fx.com%2FWikipedia&action=links",
 		},
 	}
@@ -383,6 +388,139 @@ func TestErrorRecoveryExtraParams(t *testing.T) {
 			location := rec.Header().Get("Location")
 			if location != tt.wantLocation {
 				t.Errorf("got location %q, want %q", location, tt.wantLocation)
+			}
+		})
+	}
+}
+
+func TestIgnoredParamsWithURL(t *testing.T) {
+	srv := setupTestServer(t)
+
+	tests := []struct {
+		name  string
+		query string
+	}{
+		{
+			name:  "UtmTrackingParams",
+			query: "/?url=https://x.com/Wikipedia&utm_source=twitter&utm_medium=feed&utm_campaign=promo",
+		},
+		{
+			name:  "ExtendedUtmParams",
+			query: "/?url=https://x.com/Wikipedia&utm_term=wiki&utm_content=btn&utm_id=1&utm_source_platform=web&utm_creative_format=card&utm_marketing_tactic=retargeting",
+		},
+		{
+			name:  "PaginationAndSortingParams",
+			query: "/?url=https://x.com/Wikipedia&page=2&p=3&limit=25&size=10&offset=20&sort=desc&order=asc&direction=next",
+		},
+		{
+			name:  "SearchAndIdentityParams",
+			query: "/?url=https://x.com/Wikipedia&query=go&search=1&filter=all&id=99&uuid=123e4567-e89b-12d3-a456-426614174000",
+		},
+		{
+			name:  "CamelCaseParams",
+			query: "/?url=https://x.com/Wikipedia&orderBy=name&userId=user-100",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodGet, tt.query, nil)
+			req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0")
+			rec := httptest.NewRecorder()
+
+			srv.Handler().ServeHTTP(rec, req)
+
+			if rec.Code != http.StatusTemporaryRedirect {
+				t.Fatalf("expected 307 Temporary Redirect, got %d", rec.Code)
+			}
+			location := rec.Header().Get("Location")
+			if strings.Contains(location, "action=links") {
+				t.Errorf("expected direct proxy redirect, got recovery links location: %q", location)
+			}
+			if !strings.Contains(location, "/Wikipedia") {
+				t.Errorf("expected location to contain '/Wikipedia', got %q", location)
+			}
+		})
+	}
+}
+
+func TestIgnoredParamsWithoutURL(t *testing.T) {
+	srv := setupTestServer(t)
+
+	tests := []struct {
+		name  string
+		query string
+	}{
+		{
+			name:  "UtmOnly",
+			query: "/?utm_source=twitter&utm_medium=social&utm_campaign=launch",
+		},
+		{
+			name:  "PaginationOnly",
+			query: "/?page=2&limit=50",
+		},
+		{
+			name:  "SearchAndFilterOnly",
+			query: "/?query=yups&search=yups&filter=all",
+		},
+		{
+			name:  "SortingAndCamelCaseOnly",
+			query: "/?sort=asc&orderBy=date&userId=42&uuid=550e8400-e29b-41d4-a716-446655440000",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodGet, tt.query, nil)
+			rec := httptest.NewRecorder()
+
+			srv.Handler().ServeHTTP(rec, req)
+
+			if rec.Code != http.StatusOK {
+				t.Fatalf("expected 200 OK for clean home page with ignored params, got %d", rec.Code)
+			}
+			body := rec.Body.String()
+			if !strings.Contains(body, "id=\"urlPrefix\"") {
+				t.Errorf("expected body to contain home page id='urlPrefix'")
+			}
+		})
+	}
+}
+
+func TestUnknownParamsWithoutURL(t *testing.T) {
+	srv := setupTestServer(t)
+
+	tests := []struct {
+		name  string
+		query string
+	}{
+		{
+			name:  "UnknownSingleParam",
+			query: "/?foo=bar",
+		},
+		{
+			name:  "IgnoredPlusUnknownParam",
+			query: "/?utm_source=twitter&unknown_extra=test",
+		},
+		{
+			name:  "ActionWithoutURL",
+			query: "/?action=links",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodGet, tt.query, nil)
+			rec := httptest.NewRecorder()
+
+			srv.Handler().ServeHTTP(rec, req)
+
+			if rec.Code != http.StatusBadRequest {
+				t.Fatalf("expected 400 Bad Request for unknown params, got %d", rec.Code)
+			}
+			body := rec.Body.String()
+			if !strings.Contains(body, "could not recognize a valid URL") {
+				t.Errorf("expected invalid query notice in body, got: %s", body)
 			}
 		})
 	}

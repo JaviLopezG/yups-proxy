@@ -210,8 +210,8 @@ func (s *Server) handleRoot(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// If query was provided but could not be recovered, render help with 400 Bad Request
-	if strings.TrimSpace(r.URL.RawQuery) != "" {
+	// If query was provided with unrecovered, non-ignored parameters, render help with 400 Bad Request
+	if hasNonIgnoredParams(query, r.URL.RawQuery) {
 		if rec, ok := w.(*responseRecorder); ok {
 			rec.action = "INVALID_QUERY"
 		}
@@ -438,7 +438,7 @@ func (s *Server) tryQueryRecovery(w http.ResponseWriter, r *http.Request) bool {
 	if len(query) > 0 {
 		var candidate string
 		// Common parameter aliases
-		aliases := []string{"u", "uri", "link", "target", "q", "dest", "destination", "address", "page", "site", "href"}
+		aliases := []string{"u", "uri", "link", "target", "q", "dest", "destination", "address", "site", "href"}
 		for _, alias := range aliases {
 			if val := strings.TrimSpace(query.Get(alias)); val != "" {
 				candidate = val
@@ -450,7 +450,7 @@ func (s *Server) tryQueryRecovery(w http.ResponseWriter, r *http.Request) bool {
 		if candidate == "" {
 			for k, vals := range query {
 				lk := strings.ToLower(k)
-				if lk == "action" || lk == "view" || lk == "mode" {
+				if lk == "action" || lk == "view" || lk == "mode" || isIgnoredParam(lk) {
 					continue
 				}
 				for _, v := range vals {
@@ -470,7 +470,7 @@ func (s *Server) tryQueryRecovery(w http.ResponseWriter, r *http.Request) bool {
 		if candidate == "" {
 			for k, vals := range query {
 				lk := strings.ToLower(k)
-				if lk == "action" || lk == "view" || lk == "mode" {
+				if lk == "action" || lk == "view" || lk == "mode" || isIgnoredParam(lk) {
 					continue
 				}
 				for _, v := range vals {
@@ -498,13 +498,69 @@ func (s *Server) tryQueryRecovery(w http.ResponseWriter, r *http.Request) bool {
 	return false
 }
 
+// ignoredParams contains known query parameters that should be ignored
+// rather than treated as errors (e.g. analytics, search, pagination, sorting, IDs).
+var ignoredParams = map[string]struct{}{
+	"utm_source":           {},
+	"utm_medium":           {},
+	"utm_campaign":         {},
+	"utm_term":             {},
+	"utm_content":          {},
+	"utm_id":               {},
+	"utm_source_platform":  {},
+	"utm_creative_format":  {},
+	"utm_marketing_tactic": {},
+	"query":                {},
+	"search":               {},
+	"filter":               {},
+	"page":                 {},
+	"p":                    {},
+	"limit":                {},
+	"size":                 {},
+	"offset":               {},
+	"sort":                 {},
+	"order":                {},
+	"orderby":              {},
+	"direction":            {},
+	"id":                   {},
+	"userid":               {},
+	"uuid":                 {},
+}
+
+func isIgnoredParam(param string) bool {
+	_, ok := ignoredParams[strings.ToLower(param)]
+	return ok
+}
+
 func hasExtraParams(query url.Values) bool {
 	for k := range query {
 		lk := strings.ToLower(k)
 		switch lk {
-		case "url", "action", "view", "mode":
+		case "", "url", "action", "view", "mode":
 			// Allowed canonical parameters
 		default:
+			if isIgnoredParam(lk) {
+				continue
+			}
+			return true
+		}
+	}
+	return false
+}
+
+// hasNonIgnoredParams checks whether the query contains any parameters that
+// are neither empty nor part of the known ignored parameters list.
+func hasNonIgnoredParams(query url.Values, rawQuery string) bool {
+	trimmed := strings.Trim(rawQuery, "& \t\r\n")
+	if trimmed == "" {
+		return false
+	}
+	if len(query) == 0 {
+		return !isIgnoredParam(strings.ToLower(trimmed))
+	}
+	for k := range query {
+		lk := strings.ToLower(k)
+		if lk != "" && !isIgnoredParam(lk) {
 			return true
 		}
 	}
