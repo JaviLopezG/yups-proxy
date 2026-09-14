@@ -21,6 +21,7 @@ type Entry struct {
 	Patterns    []string
 	Description string
 	Active      bool
+	AutoCheck   bool
 }
 
 // Registry manages proxy definitions and transformation rules.
@@ -45,13 +46,17 @@ func (r *Registry) LoadFromReader(reader io.Reader) error {
 		return fmt.Errorf("empty proxies csv")
 	}
 
-	// First row is header: service,tech,type,proxy_url,patterns,description,active
+	// First row is header: service,tech,type,proxy_url,patterns,description,active,auto-check
 	header := records[0]
 	activeColIdx := -1
+	autoCheckColIdx := -1
 	for colIdx, colName := range header {
-		if strings.EqualFold(strings.TrimSpace(colName), "active") {
+		norm := strings.ToLower(strings.TrimSpace(colName))
+		norm = strings.ReplaceAll(norm, "_", "-")
+		if norm == "active" {
 			activeColIdx = colIdx
-			break
+		} else if norm == "auto-check" || norm == "autocheck" || norm == "check" {
+			autoCheckColIdx = colIdx
 		}
 	}
 
@@ -77,6 +82,13 @@ func (r *Registry) LoadFromReader(reader io.Reader) error {
 			active = parseBool(row[6], true)
 		}
 
+		autoCheck := true
+		if autoCheckColIdx != -1 && len(row) > autoCheckColIdx {
+			autoCheck = parseBool(row[autoCheckColIdx], true)
+		} else if len(row) > 7 {
+			autoCheck = parseBool(row[7], true)
+		}
+
 		patternParts := strings.Split(rawPatterns, ",")
 		patterns := make([]string, 0, len(patternParts))
 		for _, p := range patternParts {
@@ -94,6 +106,7 @@ func (r *Registry) LoadFromReader(reader io.Reader) error {
 			Patterns:    patterns,
 			Description: description,
 			Active:      active,
+			AutoCheck:   autoCheck,
 		})
 	}
 
