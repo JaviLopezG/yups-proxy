@@ -68,12 +68,18 @@
         }
 
         .header-logo {
-            width: 40px;
-            height: 40px;
+            width: 36px;
+            height: 36px;
             object-fit: contain;
         }
 
-        .back-link {
+        .header-nav {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-link {
             text-decoration: none;
             color: var(--detail-brown);
             font-size: 0.9rem;
@@ -83,11 +89,18 @@
             border: 1px solid var(--border-color);
             background-color: var(--bg-color);
             transition: all 0.15s ease;
+            white-space: nowrap;
         }
 
-        .back-link:hover {
+        .nav-link:hover {
             background-color: #F3EBE1;
             border-color: var(--detail-brown);
+        }
+
+        .nav-link.active {
+            background-color: var(--primary-brown);
+            color: var(--dark-brown);
+            border-color: #D6A382;
         }
 
         main {
@@ -302,7 +315,11 @@
             <img src="/static/logo.png" alt="YUPS Logo" class="header-logo">
             <span>YUPS</span>
         </a>
-        <a href="/" class="back-link">← Home</a>
+        <nav class="header-nav">
+            <a href="/" class="nav-link">Home</a>
+            <a href="/help" class="nav-link active">Help</a>
+            <a href="/status" class="nav-link">Status</a>
+        </nav>
     </header>
 
     <main>
@@ -387,11 +404,15 @@
 
     <footer>
         <div class="footer-links">
+            <a href="/">Home</a>
+            <span>•</span>
+            <a href="/help">Help & Guide</a>
+            <span>•</span>
+            <a href="/status">Proxy Status</a>
+            <span>•</span>
             <a href="https://github.com/javilopezg/yups-proxy" target="_blank" rel="noopener noreferrer">GitHub Repository</a>
             <span>•</span>
             <a href="mailto:mail@javilopezg.com">mail@javilopezg.com</a>
-            <span>•</span>
-            <a href="/help">How it works (Help)</a>
             <span>•</span>
             <span>BSD-3-Clause License</span>
         </div>

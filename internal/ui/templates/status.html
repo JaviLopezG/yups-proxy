@@ -65,15 +65,15 @@
             align-items: center;
             gap: 12px;
             text-decoration: none;
-            color: var(--dark-brown);
+            color: var(--detail-brown);
             font-weight: 700;
-            font-size: 1.15rem;
+            font-size: 1.2rem;
         }
 
-        .header-brand img {
-            width: 32px;
-            height: 32px;
-            border-radius: 6px;
+        .header-logo {
+            width: 36px;
+            height: 36px;
+            object-fit: contain;
         }
 
         .header-controls {
@@ -111,11 +111,11 @@
         }
 
         .btn-refresh {
-            padding: 6px 12px;
+            padding: 6px 14px;
             background: var(--detail-brown);
             color: #FFFFFF;
             border: none;
-            border-radius: 6px;
+            border-radius: 16px;
             font-size: 0.85rem;
             font-weight: 600;
             cursor: pointer;
@@ -126,21 +126,34 @@
             background: var(--dark-brown);
         }
 
-        .nav-links {
+        .header-nav {
             display: flex;
-            gap: 16px;
+            align-items: center;
+            gap: 10px;
         }
 
-        .nav-links a {
-            color: var(--muted-text);
+        .nav-link {
             text-decoration: none;
+            color: var(--detail-brown);
             font-size: 0.9rem;
-            font-weight: 500;
-            transition: color 0.15s ease;
+            font-weight: 600;
+            padding: 6px 14px;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-color);
+            transition: all 0.15s ease;
+            white-space: nowrap;
         }
 
-        .nav-links a:hover {
+        .nav-link:hover {
+            background-color: #F3EBE1;
+            border-color: var(--detail-brown);
+        }
+
+        .nav-link.active {
+            background-color: var(--primary-brown);
             color: var(--dark-brown);
+            border-color: #D6A382;
         }
 
         main {
@@ -264,20 +277,29 @@
 
         footer {
             border-top: 1px solid var(--border-color);
-            padding: 16px 24px;
-            text-align: center;
+            padding: 18px 20px;
             font-size: 0.85rem;
             color: var(--muted-text);
-            background: var(--card-bg);
+            text-align: center;
+            background-color: rgba(255, 255, 255, 0.5);
         }
 
         footer a {
             color: var(--detail-brown);
             text-decoration: none;
+            font-weight: 600;
         }
 
         footer a:hover {
             text-decoration: underline;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 6px;
+            flex-wrap: wrap;
         }
 
         @media (max-width: 768px) {
@@ -289,6 +311,7 @@
             .header-controls {
                 width: 100%;
                 justify-content: space-between;
+                flex-wrap: wrap;
             }
         }
     </style>
@@ -297,8 +320,8 @@
 
     <header>
         <a href="/" class="header-brand">
-            <img src="/static/logo.png" alt="YUPS Logo">
-            <span>YUPS Proxy Status</span>
+            <img src="/static/logo.png" alt="YUPS Logo" class="header-logo">
+            <span>YUPS</span>
         </a>
 
         <div class="header-controls">
@@ -308,14 +331,19 @@
             </label>
             <span class="countdown-badge" id="countdown-badge">05:00</span>
             <button class="btn-refresh" onclick="location.reload()">Refresh</button>
-            <div class="nav-links">
-                <a href="/">Home</a>
-                <a href="/help">Help</a>
-            </div>
+            <nav class="header-nav">
+                <a href="/" class="nav-link">Home</a>
+                <a href="/help" class="nav-link">Help</a>
+                <a href="/status" class="nav-link active">Status</a>
+            </nav>
         </div>
     </header>
 
     <main>
+        <div style="margin-bottom: 24px;">
+            <h1 style="font-size: 1.6rem; font-weight: 800; color: var(--dark-brown); margin-bottom: 4px;">YUPS Proxy Status</h1>
+            <p style="font-size: 0.95rem; color: var(--muted-text);">Live health checks and availability monitoring for configured proxy instances.</p>
+        </div>
         {{if not .HasReport}}
         <div class="section-card" style="text-align: center; padding: 48px 24px;">
             <h2 style="color: var(--dark-brown); margin-bottom: 12px;">Initial Health Check in Progress</h2>
@@ -406,7 +434,22 @@
     </main>
 
     <footer>
-        <p>YUPS (Your Unified Proxy Service) &middot; <a href="/status">Status</a> &middot; <a href="/help">Guide</a> &middot; <a href="/">Home</a></p>
+        <div class="footer-links">
+            <a href="/">Home</a>
+            <span>•</span>
+            <a href="/help">Help & Guide</a>
+            <span>•</span>
+            <a href="/status">Proxy Status</a>
+            <span>•</span>
+            <a href="https://github.com/javilopezg/yups-proxy" target="_blank" rel="noopener noreferrer">GitHub Repository</a>
+            <span>•</span>
+            <a href="mailto:mail@javilopezg.com">mail@javilopezg.com</a>
+            <span>•</span>
+            <span>BSD-3-Clause License</span>
+        </div>
+        <div>
+            YUPS • Accessible, open and privacy-respecting web aggregation
+        </div>
     </footer>
 
     <script>
