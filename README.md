@@ -241,20 +241,20 @@ Sure! Extra hands are always useful.
 Of course! The more YUPS-like sites out there, the better and more resilient the
 Internet will be.
 
-### I want my own proxy to access a specific service
+### What if I want my own proxy to access a specific service?
 
 There are several open-source frontends actively maintained, such as
 [Nitter](https://github.com/zedeus/nitter) or
 [Kittygram](https://codeberg.org/irelephant/kittygram). Check the
 [proxies.csv](./data/proxies.csv) file for more examples, or drop me a line.
 
-### I want to give you money
+### What if I want to give you money?
 
 I really appreciate it, but no, thanks! I can't legally or morally accept it.
 The people doing the heavy lifting are the ones building and hosting the
 proxies, and many of them accept donations directly.
 
-### I want to help, but I prefer working solo
+### What if I want to help, but I prefer working solo?
 
 I know that feeling. Big projects need communities, but independent work can
 make huge improvements too. There are
