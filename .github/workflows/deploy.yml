@@ -1,11 +1,14 @@
 name: deploy
-# Deploys to the production server whenever a new release is published.
+# Deploys to the production server whenever a new tag (v*) is pushed or a release is published.
 # The full test suite runs first: if tests fail, nothing is deployed.
 #
 # Works on GitHub and Forgejo/Gitea runners without external marketplace actions:
 # uses native OpenSSH client and standard shell commands.
 
 on:
+  push:
+    tags:
+      - 'v*'
   release:
     types: [published]
   workflow_dispatch:
