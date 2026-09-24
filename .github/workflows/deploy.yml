@@ -103,3 +103,4 @@ jobs:
             echo "Verifying running container..."
             docker compose ps
           EOF
+
