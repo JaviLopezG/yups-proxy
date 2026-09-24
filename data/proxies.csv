@@ -1,7 +1,7 @@
 service,tech,type,proxy_url,patterns,description,active,auto-check
 general,archive.is,query_param,https://archive.is/submit/?url=,*,Archive.is web snapshot proxy,true,true
 general,archive.ph,query_param,https://archive.ph/submit/?url=,*,Archive.ph web snapshot proxy,true,true
-general,archive.vn,query_param,https://archive.ph/submit/?url=,*,Archive.ph web snapshot proxy,true,true
+general,archive.vn,query_param,https://archive.vn/submit/?url=,*,Archive.vn web snapshot proxy,true,true
 twitter,shitter,domain_replace,https://shitter.thepixora.com/,"x.com,twitter.com,fixupx.com,vxtwitter.com",Shitter Twitter frontend,false,true
 twitter,nitter,domain_replace,https://nitter.kareem.one/,"x.com,twitter.com,fixupx.com,vxtwitter.com",Nitter instance by Kareem,false,false
 twitter,dog nitter,domain_replace,https://nitter.miningtcup.me/,"x.com,twitter.com,fixupx.com,vxtwitter.com",Dog Nitter instance,true,true
