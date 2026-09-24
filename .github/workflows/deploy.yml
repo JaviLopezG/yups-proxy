@@ -1,0 +1,105 @@
+name: deploy
+# Deploys to the production server whenever a new release is published.
+# The full test suite runs first: if tests fail, nothing is deployed.
+#
+# Works on GitHub and Forgejo/Gitea runners without external marketplace actions:
+# uses native OpenSSH client and standard shell commands.
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Git ref (tag or branch) to deploy'
+        required: false
+        default: 'main'
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  test:
+    name: Run tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Run tests
+        run: |
+          make build test
+
+  deploy:
+    name: Deploy to server
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_PORT: ${{ secrets.SSH_PORT }}
+          SSH_TARGET_DIR: ${{ secrets.SSH_TARGET_DIR }}
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+          TARGET_REF: ${{ github.event.release.tag_name || github.event.inputs.ref || github.ref_name }}
+        run: |
+          if [ -z "$SSH_PRIVATE_KEY" ] || [ -z "$SSH_HOST" ] || [ -z "$SSH_USER" ]; then
+            echo "Error: Required secrets (SSH_PRIVATE_KEY, SSH_HOST, SSH_USER) are not configured."
+            exit 1
+          fi
+
+          PORT="${SSH_PORT:-22}"
+          TARGET_DIR="${SSH_TARGET_DIR:-yups-proxy}"
+
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+
+          echo "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+
+          if [ -n "$SSH_KNOWN_HOSTS" ]; then
+            echo "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          else
+            ssh-keyscan -p "$PORT" "$SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+          fi
+          chmod 644 ~/.ssh/known_hosts
+
+          echo "Deploying $TARGET_REF to $SSH_USER@$SSH_HOST:$PORT ..."
+
+          ssh -i ~/.ssh/deploy_key -p "$PORT" -o BatchMode=yes "$SSH_USER@$SSH_HOST" \
+            "TARGET_DIR=$(printf '%q' "$TARGET_DIR") TARGET_REF=$(printf '%q' "$TARGET_REF") bash -s" << 'EOF'
+            set -euo pipefail
+
+            echo "Navigating to repository directory: $TARGET_DIR"
+            cd "$TARGET_DIR"
+
+            echo "Fetching latest changes and tags..."
+            git fetch --tags origin
+
+            echo "Checking out ref: $TARGET_REF"
+            if git show-ref --verify --quiet "refs/remotes/origin/$TARGET_REF"; then
+              git checkout -B "$TARGET_REF" "origin/$TARGET_REF"
+            else
+              git checkout "$TARGET_REF"
+            fi
+
+            echo "Building Docker container image..."
+            docker compose build
+
+            echo "Recreating container in-place (minimal downtime)..."
+            docker compose up -d --remove-orphans
+
+            echo "Cleaning up dangling images..."
+            docker image prune -f
+
+            echo "Verifying running container..."
+            docker compose ps
+          EOF
