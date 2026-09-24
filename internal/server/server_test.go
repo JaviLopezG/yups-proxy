@@ -708,6 +708,16 @@ func TestStatusPageWithChecker(t *testing.T) {
 	if summaryIdx == -1 || resultsIdx == -1 || summaryIdx >= resultsIdx {
 		t.Errorf("expected summary (idx %d) to appear BEFORE results (idx %d) in HTML", summaryIdx, resultsIdx)
 	}
+
+	// Verify test URLs are clickable links in the log
+	expectedLink1 := `<a href="https://xcancel.com/Wikipedia" target="_blank" rel="noopener noreferrer" class="term-link">https://xcancel.com/Wikipedia</a>`
+	expectedLink2 := `<a href="https://scribe.r4fo.com" target="_blank" rel="noopener noreferrer" class="term-link">https://scribe.r4fo.com</a>`
+	if !strings.Contains(body, expectedLink1) {
+		t.Errorf("expected body to contain clickable link: %s", expectedLink1)
+	}
+	if !strings.Contains(body, expectedLink2) {
+		t.Errorf("expected body to contain clickable link: %s", expectedLink2)
+	}
 }
 
 func TestProxyURLReversionAndRedirection(t *testing.T) {

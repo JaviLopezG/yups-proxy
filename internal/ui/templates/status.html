@@ -32,6 +32,7 @@
             --skip-color: #D29922;
             --fallback-color: #E3B341;
             --dim-text: #8B949E;
+            --terminal-link: #58A6FF;
         }
 
         * {
@@ -275,6 +276,28 @@
 
         .term-dim { color: var(--dim-text); }
 
+        .term-url {
+            display: inline-block;
+            min-width: 40ch;
+        }
+
+        .term-link {
+            color: var(--terminal-link);
+            text-decoration: underline;
+            text-underline-offset: 3px;
+            text-decoration-color: rgba(88, 166, 255, 0.45);
+            transition: color 0.15s ease, text-decoration-color 0.15s ease;
+        }
+
+        .term-link:visited {
+            color: var(--terminal-link);
+        }
+
+        .term-link:hover {
+            color: #79C0FF;
+            text-decoration-color: #79C0FF;
+        }
+
         footer {
             border-top: 1px solid var(--border-color);
             padding: 18px 20px;
@@ -426,7 +449,7 @@
 
             <div class="terminal-container">
                 {{range .Results}}
-                <div class="term-row">  <span class="{{.TagClass}}">{{printf "%-8s" .Tag}}</span> {{printf "%-12s" .Service}} {{printf "%-16s" .Tech}} {{printf "%-40s" .TestURL}} <span class="term-dim">-></span> {{.Status}}</div>
+                <div class="term-row">  <span class="{{.TagClass}}">{{printf "%-8s" .Tag}}</span> {{printf "%-12s" .Service}} {{printf "%-16s" .Tech}} <span class="term-url"><a href="{{.TestURL}}" target="_blank" rel="noopener noreferrer" class="term-link">{{.TestURL}}</a></span> <span class="term-dim">-></span> {{.Status}}</div>
                 {{end}}
             </div>
         </section>
